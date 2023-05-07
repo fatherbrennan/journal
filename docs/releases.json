@@ -1,11 +1,11 @@
 {
-  "version": "0.1.0",
-  "notes": "Test version",
-  "pub_date": "2023-05-06T00:00:00",
+  "version": "1.0.0",
+  "notes": "Alpha",
+  "pub_date": "2023-05-07T00:00:00",
   "platforms": {
     "windows-x86_64": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVTc1M4V0gvc1orblZwcjNsMmxNcnBsRG82d3pRQnZsZ3hyTTdJMHdSZFF1cnVLZjJRYmhoc0Y1bjg1OHdpK29ud20yZmVzcGtVV2tZYnJvQlE1TUVLckhKQjNuQXFWbGc4PQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNjgzMzQxMzg5CWZpbGU6Sm91cm5hbF8wLjEuMF94NjRfZW4tVVMubXNpLnppcAoyWm9tU3VoeFV1VjhhQmVtR2FLQWtSdkNXakNyR3NWWVRBd2J0K0p4WUVMb1BsamdiWGxubytzVFNUdTdjRkNQWHZjdmRNSkk1T3FLcTE0Z09kOXhDQT09Cg==",
-      "url": "https://github.com/fatherbrennan/journal/releases/download/0.1.0/Journal_0.1.0_x64_en-US.msi.zip"
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVTc1M4V0gvc1orbmFQSEpUd2xpWEUyMUl4Y1lQaWV0Y1dPSmRINEFaclVKL2dlMm45c0hVcTRqdU5nSW0wbms5OGFaTGpBTG4weTRHWWNsM1VlWVVoUkVHTDJmQlZtVEFVPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNjgzNDU0ODQzCWZpbGU6Sm91cm5hbF8xLjAuMF94NjRfZW4tVVMubXNpLnppcApxdENMLzNtOGVzb2ROUEhDYW5ucHBnNXVjQmhrbS9Mb3ByZVJkVEtnaGVndmVDaEFXL25OMmIyOG9aRWJLZ3hHbHIrczBleVpYZ1JmVUdrQnFaTTdEdz09Cg==",
+      "url": "https://github.com/fatherbrennan/journal/releases/download/1.0.0/Journal_1.0.0_x64_en-US.msi.zip"
     }
   }
 }

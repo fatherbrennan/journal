@@ -1,20 +1,23 @@
 import { useContext, useEffect, useState } from 'react';
+import { SortAlphaDown, SortAlphaDownAlt } from 'react-bootstrap-icons';
 
 import {
   Button,
   Card,
   EditableCard,
+  FilterBar,
   Heading,
   ItemCounter,
   Searchbar,
 } from '../../components';
 import { ContactContext } from '../../context';
 import { ContactItem } from '../../context/Contact';
-import { Fields } from '../../utils';
+import { Fields, sortAscending, sortDescending } from '../../utils';
 
 export default function () {
   const contact = useContext(ContactContext);
   const [isCreateMode, setIsCreateMode] = useState(false);
+  const [isSortedByTitleFirst, setIsSortedByTitleFirst] = useState(true);
   // Track the last string searched
   const [lastSearch, setLastSearch] = useState('');
   const fields = new Fields<ContactItem>([
@@ -122,7 +125,21 @@ export default function () {
     <>
       <Heading value='Contacts' />
       <Searchbar onSubmit={filterItems} onChange={filterItems} />
-      <ItemCounter itemCount={contact.search(lastSearch).length} />
+      <div className='flex flex-row'>
+        <div className='flex'>
+          <FilterBar
+            items={[
+              {
+                activeIcon: <SortAlphaDown />,
+                inactiveIcon: <SortAlphaDownAlt />,
+                setState: setIsSortedByTitleFirst,
+                state: isSortedByTitleFirst,
+              },
+            ]}
+          />
+        </div>
+        <ItemCounter itemCount={contact.search(lastSearch).length} />
+      </div>
       <div className='flex flex-col items-center'>
         {isCreateMode ? (
           <EditableCard
@@ -134,7 +151,10 @@ export default function () {
         ) : (
           <Button onClick={toggleCreateMode}>Create</Button>
         )}
-        {contact.search(lastSearch).map((item) => (
+        {(isSortedByTitleFirst ? sortAscending : sortDescending)(
+          contact.search(lastSearch),
+          'nickname'
+        ).map((item) => (
           <Card
             key={item._id}
             fields={fields.get(item)}

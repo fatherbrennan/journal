@@ -1,4 +1,4 @@
-import { randomUUID, sortAscending, sortDescending } from '..';
+import { randomUUID } from '..';
 
 import type { Dispatch, SetStateAction } from 'react';
 
@@ -99,20 +99,6 @@ export class SearchStore<T extends PlainObject<any>> extends Store<T> {
         }
       }
     });
-  }
-
-  /**
-   * Sort items by latest first.
-   */
-  public sortLatest(): void {
-    this.setStore((prevState) => sortAscending([...prevState]));
-  }
-
-  /**
-   * Sort items by oldest first.
-   */
-  public sortOldest(): void {
-    this.setStore((prevState) => sortDescending([...prevState]));
   }
 
   constructor(props?: SearchStoreProps<T>) {

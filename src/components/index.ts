@@ -1,6 +1,7 @@
 import Button from './Button';
 import Card from './Card';
 import EditableCard from './EditableCard';
+import FilterBar from './FilterBar';
 import Form from './Form';
 import Heading from './Heading';
 import IconButton from './IconButton';
@@ -14,6 +15,7 @@ export {
   Button,
   Card,
   EditableCard,
+  FilterBar,
   Form,
   Heading,
   IconButton,

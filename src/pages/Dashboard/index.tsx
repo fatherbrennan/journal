@@ -1,20 +1,23 @@
 import { useContext, useEffect, useState } from 'react';
+import { SortNumericDown, SortNumericDownAlt } from 'react-bootstrap-icons';
 
 import {
   Button,
   Card,
   EditableCard,
+  FilterBar,
   Heading,
   ItemCounter,
   Searchbar,
 } from '../../components';
 import { JournalContext } from '../../context';
 import { JournalItem } from '../../context/Journal';
-import { Fields } from '../../utils';
+import { Fields, sortAscending, sortDescending } from '../../utils';
 
 export default function () {
   const journal = useContext(JournalContext);
   const [isCreateMode, setIsCreateMode] = useState(false);
+  const [isSortedByLatestFirst, setIsSortedByLatestFirst] = useState(true);
   // Track the last string searched
   const [lastSearch, setLastSearch] = useState('');
   const fields = new Fields<JournalItem>([
@@ -126,7 +129,21 @@ export default function () {
     <>
       <Heading value='Log' />
       <Searchbar onSubmit={filterItems} onChange={filterItems} />
-      <ItemCounter itemCount={journal.search(lastSearch).length} />
+      <div className='flex flex-row justify-between'>
+        <div className='flex'>
+          <FilterBar
+            items={[
+              {
+                activeIcon: <SortNumericDown />,
+                inactiveIcon: <SortNumericDownAlt />,
+                setState: setIsSortedByLatestFirst,
+                state: isSortedByLatestFirst,
+              },
+            ]}
+          />
+        </div>
+        <ItemCounter itemCount={journal.search(lastSearch).length} />
+      </div>
       <div className='flex flex-col items-center'>
         {isCreateMode ? (
           <EditableCard
@@ -140,7 +157,10 @@ export default function () {
         ) : (
           <Button onClick={toggleCreateMode}>Create</Button>
         )}
-        {journal.search(lastSearch).map((item) => (
+        {(isSortedByLatestFirst ? sortDescending : sortAscending)(
+          journal.search(lastSearch),
+          'ts'
+        ).map((item) => (
           <Card
             key={item._id}
             fields={fields.get({

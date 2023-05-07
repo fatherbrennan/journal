@@ -14,28 +14,34 @@ const randomUUID = () => {
 };
 
 /**
- * Return a sorted array in descending order.
- * - Dates: Oldest > Recent
- * - Numbers: Smallest > Largest
- * - Letters: A > Z
+ * Sorts a shallow copy of an array in ascending order.
+ * - 1-9
+ * - A-Z
+ * - a-z
  * @param items Array to sort.
- * @returns Shallow copy of sorted array.
+ * @param key Key to sort by.
+ * @returns Reference to the passed array.
  */
-const sortDescending = (items: Array<any>) => {
-  return items.sort((a, b) => (a ? -1 : b ? 1 : 0));
-};
+function sortAscending<T = any>(items: Array<T>, key: keyof T) {
+  return [...items].sort((a, b) =>
+    a[key] > b[key] ? 1 : a[key] < b[key] ? -1 : 0
+  );
+}
 
 /**
- * Return a sorted array in ascending order.
- * - Dates: Recent > Oldest
- * - Numbers: Largest > Smallest
- * - Letters: Z > A
+ * Sorts a shallow copy of an array in descending order.
+ * - 9-1
+ * - z-a
+ * - Z-A
  * @param items Array to sort.
- * @returns Shallow copy of sorted array.
+ * @param key Key to sort by.
+ * @returns Reference to the passed array.
  */
-const sortAscending = (items: Array<any>) => {
-  return items.sort((a, b) => (b ? -1 : a ? 1 : 0));
-};
+function sortDescending<T = any>(items: Array<T>, key: keyof T) {
+  return [...items].sort((a, b) =>
+    a[key] > b[key] ? -1 : a[key] < b[key] ? 1 : 0
+  );
+}
 
 export class Fields<T extends PlainObject<any>> {
   /**

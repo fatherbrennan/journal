@@ -1,21 +1,24 @@
 import { useContext, useEffect, useState } from 'react';
+import { SortAlphaDown, SortAlphaDownAlt } from 'react-bootstrap-icons';
 
 import {
   Button,
   Card,
   EditableCard,
+  FilterBar,
   Heading,
   ItemCounter,
   Searchbar,
 } from '../../components';
 import { LibraryContext } from '../../context';
-import { Fields } from '../../utils';
+import { Fields, sortAscending, sortDescending } from '../../utils';
 
 import type { LibraryItem } from '../../context/Library';
 
 export default function () {
   const library = useContext(LibraryContext);
   const [isCreateMode, setIsCreateMode] = useState(false);
+  const [isSortedByLabelFirst, setIsSortedByLabelFirst] = useState(true);
   // Track the last string searched
   const [lastSearch, setLastSearch] = useState('');
   const fields = new Fields<LibraryItem>([
@@ -90,7 +93,21 @@ export default function () {
     <>
       <Heading value='Library' />
       <Searchbar onSubmit={filterItems} onChange={filterItems} />
-      <ItemCounter itemCount={library.store.length} />
+      <div className='flex flex-row'>
+        <div className='flex'>
+          <FilterBar
+            items={[
+              {
+                activeIcon: <SortAlphaDown />,
+                inactiveIcon: <SortAlphaDownAlt />,
+                setState: setIsSortedByLabelFirst,
+                state: isSortedByLabelFirst,
+              },
+            ]}
+          />
+        </div>
+        <ItemCounter itemCount={library.store.length} />
+      </div>
       <div className='flex flex-col items-center'>
         {isCreateMode ? (
           <EditableCard
@@ -102,7 +119,10 @@ export default function () {
         ) : (
           <Button onClick={toggleCreateMode}>Create</Button>
         )}
-        {library.search(lastSearch).map((item) => (
+        {(isSortedByLabelFirst ? sortAscending : sortDescending)(
+          library.search(lastSearch),
+          'label'
+        ).map((item) => (
           <Card
             key={item._id}
             editableTitle='Update Item'
