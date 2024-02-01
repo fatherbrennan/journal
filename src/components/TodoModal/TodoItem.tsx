@@ -1,76 +1,97 @@
 import { useState } from 'react';
 
-import { IconButton } from '..';
-import { Edit, Plus } from '../../icons';
-import EditableTodoItem from './EditableTodoItem';
-import TodoItemCheckbox from './TodoItemCheckbox';
+import { IconButton } from '~/components';
+import { Bin, Check, Edit, Plus, X } from '~/icons';
+import { EditableTodoItem } from './EditableTodoItem';
+import { TodoItemCheckbox } from './TodoItemCheckbox';
+
+import type { Todos } from '~/db/schema/todos';
+import type { TodoSubitem } from '~/db/schema/todos_subitems';
 
 interface TodoItemProps {
   /**
-   * Todo item unique identifier. Omitted on item creation.
+   * To Do item unique identifier. Omitted on item creation.
    */
-  id: string;
-
-  /**
-   * Todo subitem unique identifier. Omitted on subitem creation.
-   */
-  subitemId?: string;
+  id: Todos['id'] | TodoSubitem['id'];
 
   /**
    * Item value.
    */
-  value: string;
+  value: Todos['value'];
+
+  /**
+   * Should component act as a subitem.
+   */
+  isSubitem?: boolean;
+
+  /**
+   * Should component act as a checked item.
+   */
+  isChecked?: boolean;
 
   /**
    * Callback function to execute on create event.
    * Event fires when create subitem button is clicked.
    * @param id Unique identifier of todo item.
    */
-  onCreate?: (id: string) => void;
+  onCreate?: (id: Todos['id'] | TodoSubitem['id']) => void;
+
+  /**
+   * Callback function to execute on check event.
+   * @param id Unique identifier of todo item.
+   * @param checked Check value.
+   */
+  onCheck?: (id: Todos['id'] | TodoSubitem['id'], checked?: boolean) => void;
 
   /**
    * Callback function to execute on delete event.
    * @param id Unique identifier of todo item.
-   * @param subitemId Unique identifier of todo subitem (is subitem of `id`).
    */
-  onDelete?: (id: string, subitemId?: string) => void;
+  onDelete?: (id: Todos['id'] | TodoSubitem['id']) => void;
 
   /**
    * Callback function to execute on submit event.
    * @param data Data from form as key:value.
    * @param id Unique identifier of todo item.
-   * @param subitemId Unique identifier of todo subitem (is subitem of `id`).
    */
-  onSubmit: (data: any, id: string, subitemId?: string) => void;
+  onSubmit: (data: any, id: Todos['id'] | TodoSubitem['id']) => void;
 }
 
-export default function TodoItem(props: TodoItemProps) {
-  const [isDeleteMode, setIsDeleteMode] = useState(false);
+export function TodoItem({ id, value, isSubitem = false, isChecked = false, onCreate, onCheck, onDelete, onSubmit }: TodoItemProps) {
+  const [isCheckMode, setIsCheckMode] = useState(false);
   const [isUpdateMode, setIsUpdateMode] = useState(false);
-  const [deleteTimeoutId, setDeleteTimeoutId] = useState<NodeJS.Timeout>();
+  const [isDeleteMode, setIsDeleteMode] = useState(false);
+  const [checkTimeoutId, setCheckTimeoutId] = useState<NodeJS.Timeout>();
 
   /**
    * Trigger create event for parent component.
    */
   const createSubitem = () => {
-    props.onCreate!(props.id);
+    onCreate!(id);
   };
 
   /**
    * Trigger delete event for parent component.
    */
   const deleteItem = () => {
-    props.onDelete!(props.id!, props.subitemId);
-    setIsDeleteMode(false);
+    onDelete!(id);
   };
 
   /**
-   * Cancel the delete timeout.
+   * Trigger check event for parent component.
    */
-  const cancelDeleteItem = () => {
-    clearTimeout(deleteTimeoutId);
-    setDeleteTimeoutId(undefined);
-    setIsDeleteMode(false);
+  const checkItem = () => {
+    onCheck!(id, !isChecked);
+    setIsCheckMode(false);
+  };
+
+  /**
+   * Cancel the check timeout.
+   */
+  const cancelCheckItem = () => {
+    clearTimeout(checkTimeoutId);
+    setCheckTimeoutId(undefined);
+    setIsCheckMode(false);
   };
 
   /**
@@ -85,16 +106,16 @@ export default function TodoItem(props: TodoItemProps) {
    * @param data Data from editable item form as key:value.
    */
   const updateItem = (data: any) => {
-    props.onSubmit(data, props.id!, props.subitemId);
+    onSubmit(data, id);
     setIsUpdateMode(false);
   };
 
   /**
-   * Set item to delete mode.
+   * Set item to check mode.
    */
-  const attemptDeleteItem = () => {
-    setDeleteTimeoutId(setTimeout(deleteItem, 3000));
-    setIsDeleteMode(true);
+  const attemptCheckItem = () => {
+    setCheckTimeoutId(setTimeout(checkItem, 3000));
+    setIsCheckMode(true);
   };
 
   /**
@@ -105,25 +126,28 @@ export default function TodoItem(props: TodoItemProps) {
   };
 
   return (
-    <div className='group flex justify-between w-full my-2'>
+    <div className='flex justify-between w-full my-2 group'>
       {isUpdateMode ? (
-        <EditableTodoItem
-          value={props.value}
-          onCancel={cancelUpdateItem}
-          onSubmit={updateItem}
-        />
+        <EditableTodoItem value={value} onCancel={cancelUpdateItem} onSubmit={updateItem} />
       ) : (
         <div className='flex flex-row items-center w-full rounded-lg hover:bg-primary'>
-          <TodoItemCheckbox
-            isChecked={isDeleteMode}
-            onClick={isDeleteMode ? cancelDeleteItem : attemptDeleteItem}
-          />
-          <label className='flex-grow overflow-auto'>{props.value}</label>
+          <TodoItemCheckbox isChecked={isChecked} isCheckActive={isCheckMode} onClick={isCheckMode ? cancelCheckItem : attemptCheckItem} />
+          <label className={`flex-grow overflow-auto${isChecked ? ' text-gray-400' : ''}`}>{value}</label>
           <div className='flex invisible group-hover:visible'>
-            <IconButton onClick={attemptUpdateItem} icon={<Edit />} />
-            {/* Don't include add subitem button on subitems */}
-            {props.subitemId === undefined && (
-              <IconButton onClick={createSubitem} icon={<Plus />} />
+            {isChecked ? (
+              isDeleteMode ? (
+                <>
+                  <IconButton onClick={deleteItem} icon={<Check />} />
+                  <IconButton onClick={() => setIsDeleteMode(false)} icon={<X />} />
+                </>
+              ) : (
+                <IconButton onClick={() => setIsDeleteMode(true)} icon={<Bin />} />
+              )
+            ) : (
+              <>
+                <IconButton onClick={attemptUpdateItem} icon={<Edit />} />
+                {!isSubitem && <IconButton onClick={createSubitem} icon={<Plus />} />}
+              </>
             )}
           </div>
         </div>

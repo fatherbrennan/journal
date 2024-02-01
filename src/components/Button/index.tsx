@@ -12,16 +12,10 @@ interface ButtonProps extends PropsWithChildren {
   onClick: MouseEventHandler<HTMLButtonElement>;
 }
 
-export default function Button(props: ButtonProps) {
+export function Button({ isSubmit, children, onClick }: ButtonProps) {
   return (
-    <button
-      className='flex w-full rounded-lg my-2 cursor-pointer bg-primary'
-      type={props.isSubmit ? 'submit' : 'button'}
-      onClick={props.onClick}
-    >
-      <div className='w-full text-sm text-center font-normal text-gray-600 rounded-xl p-2 border border-transparent border-gray-100 hover:border-gray-300'>
-        {props.children}
-      </div>
+    <button className='flex w-full my-2 rounded-lg cursor-pointer bg-primary' type={isSubmit ? 'submit' : 'button'} onClick={onClick}>
+      <div className='w-full p-2 text-sm font-normal text-center text-gray-600 border border-transparent border-gray-100 rounded-xl hover:border-gray-300'>{children}</div>
     </button>
   );
 }

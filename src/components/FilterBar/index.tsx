@@ -1,35 +1,13 @@
-import { IconButton } from '..';
+import { Children } from 'react';
 
-import type { Dispatch, ReactNode, SetStateAction } from 'react';
+import type { PropsWithChildren, ReactNode } from 'react';
 
-interface FilterBarItem {
-  activeIcon: ReactNode;
-  inactiveIcon: ReactNode;
-  state: boolean;
-  setState: Dispatch<SetStateAction<boolean>>;
-}
-
-interface FilterBarProps {
-  items: Array<FilterBarItem>;
-}
-
-export default function FilterBar(props: FilterBarProps) {
+export function FilterBar({ children }: PropsWithChildren) {
   return (
-    <div className='flex'>
-      {props.items.map((item, i) => {
-        /**
-         * Toggle filter state.
-         */
-        const toggle = () => {
-          item.setState((prevState) => !prevState);
-        };
-
-        return item.state ? (
-          <IconButton key={i} icon={item.activeIcon} onClick={toggle} />
-        ) : (
-          <IconButton key={i} icon={item.inactiveIcon} onClick={toggle} />
-        );
-      })}
+    <div className='flex flex-row justify-start'>
+      {Children.map(children, (child: ReactNode) => (
+        <span className='mx-1'>{child}</span>
+      ))}
     </div>
   );
 }

@@ -1,21 +1,27 @@
-import { Fragment, useContext, useState } from 'react';
+import { Fragment, useContext, useEffect, useState } from 'react';
 
-import { Button, ItemCounter } from '..';
-import { TodoContext } from '../../context';
-import EditableTodoItem from './EditableTodoItem';
-import TodoItem from './TodoItem';
+import { Button, ItemCounter } from '~/components';
+import { TodoContext } from '~/context';
+import { Db } from '~/db/utils';
+import { usePagination } from '~/hooks';
+import { EditableTodoItem } from './EditableTodoItem';
+import { TodoItem } from './TodoItem';
+
+import type { Todos } from '~/db/schema/todos';
+import type { TodoSubitem } from '~/db/schema/todos_subitems';
 
 interface TodoListProps {
   /**
-   * Show item counter.
+   * When `true`, will display the item count.
    */
-  hasItemCount?: boolean;
+  doHideItemCount?: boolean;
 }
 
-export default function TodoList(props: TodoListProps) {
-  const todo = useContext(TodoContext);
-  const [createSubitemId, setCreateSubitemId] = useState<string>();
+export function TodoList({ doHideItemCount = false }: TodoListProps) {
+  const [createSubitemId, setCreateSubitemId] = useState<Todos['id']>();
   const [isCreateMode, setIsCreateMode] = useState(false);
+  const { count, items, handleDbResponse } = usePagination<Awaited<ReturnType<typeof Db.getTodos>>['result']>();
+  const todoContext = useContext(TodoContext);
 
   /**
    * Toggle create card visibility.
@@ -39,19 +45,41 @@ export default function TodoList(props: TodoListProps) {
   };
 
   /**
+   * Check item.
+   * @param id Item identifier.
+   * @param checked Check value.
+   */
+  const checkItem = async (id: Todos['id'], checked?: boolean) => {
+    await Db.checkTodo(id, checked);
+    getTodos();
+  };
+
+  /**
+   * Check subitem.
+   * @param subitemId Item identifier.
+   * @param checked Check value.
+   */
+  const checkSubitem = async (subitemId: TodoSubitem['id'], checked?: boolean) => {
+    await Db.checkTodoSubitem(subitemId, checked);
+    getTodos();
+  };
+
+  /**
    * Delete item.
    * @param id Item identifier.
    */
-  const deleteItem = (id: string) => {
-    todo.delete(id);
+  const deleteItem = async (id: Todos['id']) => {
+    await Db.deleteTodo(id);
+    getTodos();
   };
 
   /**
    * Delete subitem.
-   * @param id Item identifier.
+   * @param subitemId Item identifier.
    */
-  const deleteSubitem = (id: string, subitemId?: string) => {
-    todo.deleteSubitem(id, subitemId!);
+  const deleteSubitem = async (subitemId: TodoSubitem['id']) => {
+    await Db.deleteTodoSubitem(subitemId);
+    getTodos();
   };
 
   /**
@@ -59,29 +87,28 @@ export default function TodoList(props: TodoListProps) {
    * @param data Form submit data.
    * @param id Item identifier.
    */
-  const updateItem = (data: any, id: string) => {
-    todo.update(id, data);
+  const updateItem = async (data: any, id: Todos['id']) => {
+    await Db.updateTodo(id, data);
+    getTodos();
   };
 
   /**
    * Update subitem.
    * @param data Form submit data.
-   * @param id Item identifier.
    * @param subitemId Subitem identifier.
    */
-  const updateSubitem = (data: any, id: string, subitemId?: string) => {
-    todo.updateSubitem(id, subitemId!, data);
+  const updateSubitem = async (data: any, subitemId: TodoSubitem['id']) => {
+    await Db.updateTodoSubitem(subitemId, data);
+    getTodos();
   };
 
   /**
    * Create a new item.
    * @param data Form submit data.
    */
-  const createItem = (data: any) => {
-    todo.create({
-      ...data,
-      subItems: [],
-    });
+  const createItem = async (data: any) => {
+    await Db.createTodo(data);
+    getTodos();
     closeCreateMode();
   };
 
@@ -89,55 +116,51 @@ export default function TodoList(props: TodoListProps) {
    * Create a new subitem.
    * @param data Form submit data.
    */
-  const createSubitem = (data: any) => {
-    todo.createSubitem(createSubitemId!, data);
+  const createSubitem = async (data: any) => {
+    await Db.createTodoSubitem({ ...data, todoId: createSubitemId! });
+    getTodos();
     closeCreateSubitemMode();
   };
 
+  /**
+   * Get todo items and their subitems.
+   */
+  const getTodos = () => {
+    Db.getTodos().then(handleDbResponse);
+  };
+
+  useEffect(getTodos, []);
+
+  useEffect(() => todoContext.setItemCount(count), [count]);
+
   return (
     <>
-      {props.hasItemCount && <ItemCounter itemCount={todo.store.length} />}
-      {todo.store.map((item) => (
-        <Fragment key={item._id}>
-          <TodoItem
-            id={item._id}
-            value={item.value}
-            onCreate={setCreateSubitemId}
-            onDelete={deleteItem}
-            onSubmit={updateItem}
-          />
-          {(item.subItems.length > 0 || createSubitemId !== undefined) && (
-            <div className='pl-6'>
-              {item.subItems.map((subItem) => (
-                <TodoItem
-                  key={subItem._id}
-                  id={item._id}
-                  subitemId={subItem._id}
-                  value={subItem.value}
-                  onDelete={deleteSubitem}
-                  onSubmit={updateSubitem}
-                />
-              ))}
-              {createSubitemId === item._id && (
-                <EditableTodoItem
-                  value=''
-                  onCancel={closeCreateSubitemMode}
-                  onSubmit={createSubitem}
-                />
-              )}
-            </div>
-          )}
-        </Fragment>
-      ))}
-      {isCreateMode ? (
-        <EditableTodoItem
-          value=''
-          onSubmit={createItem}
-          onCancel={closeCreateMode}
-        />
-      ) : (
-        <Button onClick={toggleCreateMode}>New Item</Button>
-      )}
+      {!doHideItemCount && <ItemCounter itemCount={count} />}
+      <div className='overflow-auto'>
+        {items.map((item) => (
+          <Fragment key={item.id}>
+            <TodoItem id={item.id} value={item.value} isChecked={item.isChecked} onCreate={setCreateSubitemId} onCheck={checkItem} onDelete={deleteItem} onSubmit={updateItem} />
+            {(item.subitems.length > 0 || createSubitemId !== undefined) && (
+              <div className='pl-6'>
+                {item.subitems.map((subitem) => (
+                  <TodoItem
+                    key={item.id + subitem.id}
+                    id={subitem.id}
+                    value={subitem.value}
+                    isChecked={subitem.isChecked}
+                    onDelete={deleteSubitem}
+                    onCheck={checkSubitem}
+                    onSubmit={updateSubitem}
+                    isSubitem
+                  />
+                ))}
+                {createSubitemId === item.id && <EditableTodoItem value='' onCancel={closeCreateSubitemMode} onSubmit={createSubitem} />}
+              </div>
+            )}
+          </Fragment>
+        ))}
+        {isCreateMode ? <EditableTodoItem value='' onSubmit={createItem} onCancel={closeCreateMode} /> : <Button onClick={toggleCreateMode}>New Item</Button>}
+      </div>
     </>
   );
 }

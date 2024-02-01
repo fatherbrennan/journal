@@ -1,12 +1,12 @@
-import { Form } from '..';
+import { Form } from '~/components';
 
-import type { Field } from '../../../types/types';
+import type { Field } from '~/../types/types';
 
 interface EditableCardProps {
   /**
    * Field options.
    */
-  fields: Array<Field>;
+  fields: Field[];
 
   /**
    * Card header.
@@ -26,15 +26,10 @@ interface EditableCardProps {
   onSubmit: (data: any, event: any) => void;
 }
 
-export default function EditableCard(props: EditableCardProps) {
+export function EditableCard({ fields, title, onSubmit, onCancel }: EditableCardProps) {
   return (
-    <div className='w-full max-w-7xl p-4 bg-white border border-cyan-200 rounded-lg shadow sm:p-6 mb-8 mt-2 overflow-auto'>
-      <Form
-        fields={props.fields}
-        title={props.title}
-        onCancel={props.onCancel}
-        onSubmit={props.onSubmit}
-      ></Form>
+    <div className='w-full p-4 mt-2 mb-8 overflow-auto bg-white border rounded-lg shadow max-w-7xl border-cyan-200 sm:p-6'>
+      <Form fields={fields} title={title} onCancel={onCancel} onSubmit={onSubmit} />
     </div>
   );
 }

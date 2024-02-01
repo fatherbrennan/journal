@@ -5,10 +5,10 @@ interface ItemCounterProps {
   itemCount: number;
 }
 
-export default function ItemCounter(props: ItemCounterProps) {
+export function ItemCounter({ itemCount }: ItemCounterProps) {
   return (
-    <div className='text-right w-full flex justify-end items-end'>
-      <span className='text-gray-500 text-xs'>{props.itemCount} items</span>
+    <div className='flex items-end justify-end w-full text-right'>
+      <span className='text-xs text-gray-500'>{itemCount} items</span>
     </div>
   );
 }
