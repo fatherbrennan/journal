@@ -74,11 +74,7 @@ export class Db {
       .limit(itemsPerPage)
       .offset(offset);
 
-    const count = await baseCountQuery
-      .where(where)
-      .orderBy(...orderBy)
-      .limit(itemsPerPage)
-      .offset(offset);
+    const count = await baseCountQuery.where(where);
 
     return { count: count[0].count, result };
   }
@@ -148,11 +144,7 @@ export class Db {
       .limit(itemsPerPage)
       .offset(offset);
 
-    const count = await baseCountQuery
-      .where(where)
-      .orderBy(...orderBy)
-      .limit(itemsPerPage)
-      .offset(offset);
+    const count = await baseCountQuery.where(where);
 
     return { count: count[0].count, result };
   }
@@ -202,11 +194,7 @@ export class Db {
       .limit(itemsPerPage)
       .offset(offset);
 
-    const count = await baseCountQuery
-      .where(where)
-      .orderBy(...orderBy)
-      .limit(itemsPerPage)
-      .offset(offset);
+    const count = await baseCountQuery.where(where);
 
     return { count: count[0].count, result };
   }
