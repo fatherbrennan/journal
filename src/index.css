@@ -24,6 +24,16 @@
   border: 0.25rem solid var(--bg-primary);
 }
 
+html,
 body {
   background-color: var(--bg-primary);
+  @apply h-full overflow-hidden;
+}
+
+#root {
+  @apply flex flex-col h-full;
+}
+
+#root > main {
+  scrollbar-gutter: stable both-edges;
 }

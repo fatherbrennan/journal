@@ -8,7 +8,7 @@ import {
   X as XIcon,
 } from 'react-bootstrap-icons';
 
-import type { HTMLElementClassName } from '../../types/types';
+import type { HTMLElementClassName } from '~/../types/types';
 
 interface Theme {
   /**
@@ -35,13 +35,7 @@ const theme: Theme = {
 
 export const Journal = () => {
   return (
-    <svg
-      version='1.1'
-      viewBox='0 0 256 64'
-      xmlns='http://www.w3.org/2000/svg'
-      fill={theme.fill}
-      className={theme.md + ' h-7'}
-    >
+    <svg version='1.1' viewBox='0 0 256 64' xmlns='http://www.w3.org/2000/svg' fill={theme.fill} className={theme.md + ' h-7'}>
       <path d='m31.199 29.158v-16.758h2.0349v14.644l3.5468-2.5065a1.0174 1.197 0 0 1 1.0459 0l3.5468 2.5065v-14.644h2.0349v16.758a1.0174 1.197 0 0 1-1.5404 1.027l-4.5643-3.2223-4.5643 3.2247a1.0174 1.197 0 0 1-1.5404-1.0294z' />
       <path d='m21.539 9.6h23.8a4.76 5.6 0 0 1 4.76 5.6v33.6a4.76 5.6 0 0 1-4.76 5.6h-23.8a4.76 5.6 0 0 1-4.76-5.6v-2.8h2.38v2.8a2.38 2.8 0 0 0 2.38 2.8h23.8a2.38 2.8 0 0 0 2.38-2.8v-33.6a2.38 2.8 0 0 0-2.38-2.8h-23.8a2.38 2.8 0 0 0-2.38 2.8v2.8h-2.38v-2.8a4.76 5.6 0 0 1 4.76-5.6z' />
       <path d='m16.779 23.6v-1.4a1.19 1.4 0 0 1 2.38 0v1.4h1.19a1.19 1.4 0 0 1 0 2.8h-4.76a1.19 1.4 0 0 1 0-2.8zm0 8.4v-1.4a1.19 1.4 0 0 1 2.38 0v1.4h1.19a1.19 1.4 0 0 1 0 2.8h-4.76a1.19 1.4 0 0 1 0-2.8zm0 8.4v-1.4a1.19 1.4 0 0 1 2.38 0v1.4h1.19a1.19 1.4 0 0 1 0 2.8h-4.76a1.19 1.4 0 0 1 0-2.8z' />
@@ -65,9 +59,7 @@ export const Check = () => {
 };
 
 export const Checklist = (props: { className: HTMLElementClassName }) => {
-  return (
-    <ChecklistIcon className={props.className || theme.md} fill={theme.fill} />
-  );
+  return <ChecklistIcon className={props.className || theme.md} fill={theme.fill} />;
 };
 
 export const Edit = () => {

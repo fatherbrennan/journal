@@ -1,67 +1,37 @@
-import { useContext, useEffect, useState } from 'react';
-import { SortAlphaDown, SortAlphaDownAlt } from 'react-bootstrap-icons';
+import { useEffect, useState } from 'react';
+import { PersonFillCheck, PersonFillX, SortAlphaDown, SortAlphaDownAlt } from 'react-bootstrap-icons';
 
-import {
-  Button,
-  Card,
-  EditableCard,
-  FilterBar,
-  Heading,
-  ItemCounter,
-  Searchbar,
-} from '../../components';
-import { ContactContext } from '../../context';
-import { ContactItem } from '../../context/Contact';
-import { Fields, sortAscending, sortDescending } from '../../utils';
+import { Button, Card, EditableCard, FilterBar, Heading, ItemCounter, PaginationBar, Searchbar, StatefulIconButton } from '~/components';
+import { Db } from '~/db/utils';
+import { usePagination } from '~/hooks';
+import { Fields } from '~/utils';
 
-export default function () {
-  const contact = useContext(ContactContext);
+import { Contact } from '~/db/schema/contacts';
+
+import type { SQLOrderKeys } from '~/db/utils';
+
+interface ContactFormData {
+  title: string;
+  nickname: string;
+  firstName: string;
+  lastName: string;
+  notes: string;
+  status: boolean;
+}
+
+export function Contacts() {
   const [isCreateMode, setIsCreateMode] = useState(false);
-  const [isSortedByTitleFirst, setIsSortedByTitleFirst] = useState(true);
-  // Track the last string searched
-  const [lastSearch, setLastSearch] = useState('');
-  const fields = new Fields<ContactItem>([
-    {
-      key: 'title',
-      label: 'Title',
-      type: 'string',
-      hasCard: false,
-      required: true,
-      autoFocus: true,
-    },
-    {
-      key: 'nickname',
-      label: 'Nickname',
-      type: 'string',
-      required: true,
-      cardIsSrOnly: false,
-    },
-    {
-      key: 'firstName',
-      label: 'First Name',
-      type: 'string',
-      required: true,
-      cardIsSrOnly: false,
-    },
-    {
-      key: 'lastName',
-      label: 'Last Name',
-      type: 'string',
-      required: true,
-      cardIsSrOnly: false,
-    },
-    {
-      key: 'notes',
-      label: 'Notes',
-      type: 'note',
-      cardIsSrOnly: false,
-    },
-    {
-      key: 'status',
-      label: 'Active Status',
-      type: 'boolean',
-      cardIsSrOnly: false,
-    },
+  const [doShowInactive, setDoShowInactive] = useState(false);
+  const [order, setOrder] = useState<SQLOrderKeys>('asc');
+  const [search, setSearch] = useState('');
+  const { activePage, count, items, itemsPerPage, handleDbResponse, onPage, onPrev, onNext, totalPages } = usePagination<Awaited<ReturnType<typeof Db.getContacts>>['result']>();
+  const fields = new Fields([
+    { key: 'title', label: 'Title', type: 'string', hasCard: false, required: true, isHtml: true, autoFocus: true },
+    { key: 'nickname', label: 'Nickname', type: 'string', required: true, isHtml: true, cardIsSrOnly: false },
+    { key: 'firstName', label: 'First Name', type: 'string', required: true, isHtml: true, cardIsSrOnly: false },
+    { key: 'lastName', label: 'Last Name', type: 'string', required: true, isHtml: true, cardIsSrOnly: false },
+    { key: 'notes', label: 'Notes', type: 'note', cardIsSrOnly: false },
+    { key: 'status', label: 'Active Status', type: 'boolean', value: true, cardIsSrOnly: false },
   ]);
 
   /**
@@ -79,25 +49,12 @@ export default function () {
   };
 
   /**
-   * Update visible items based on input pattern.
-   * If `pattern` is omitted, the last known pattern is used.
-   * @param pattern Filter string.
-   */
-  const filterItems = (pattern?: string) => {
-    try {
-      setLastSearch(pattern === undefined ? lastSearch : pattern);
-    } catch (error) {
-      // Avoid invalid regexp patterns e.g. `abc[`
-      return;
-    }
-  };
-
-  /**
    * Delete item.
    * @param id Item identifier.
    */
-  const deleteItem = (id: string) => {
-    contact.delete(id);
+  const deleteItem = async (id: Contact['id']) => {
+    await Db.deleteContact(id);
+    getContacts();
   };
 
   /**
@@ -105,66 +62,72 @@ export default function () {
    * @param data Form submit data.
    * @param id Item identifier.
    */
-  const updateItem = (data: any, id: string) => {
-    contact.update(id, data);
+  const updateItem = async (data: ContactFormData, id: Contact['id']) => {
+    await Db.updateContact(id, data);
+    getContacts();
   };
 
   /**
    * Create a new item.
    * @param data Form submit data.
    */
-  const createItem = (data: any) => {
-    contact.create(data);
+  const createItem = async (data: ContactFormData) => {
+    await Db.createContact(data);
+    getContacts();
     setIsCreateMode(false);
   };
 
+  /**
+   * Get contact items based on order and search.
+   */
+  const getContacts = () => {
+    Db.getContacts({
+      activePage,
+      itemsPerPage,
+      order,
+      search,
+      doShowInactive,
+    }).then(handleDbResponse);
+  };
+
   // Force refresh of visible entries on context update
-  useEffect(filterItems, [contact.store]);
+  useEffect(getContacts, [activePage, itemsPerPage, order, search, doShowInactive]);
 
   return (
     <>
       <Heading value='Contacts' />
-      <Searchbar onSubmit={filterItems} onChange={filterItems} />
-      <div className='flex flex-row'>
-        <div className='flex'>
-          <FilterBar
-            items={[
-              {
-                activeIcon: <SortAlphaDown />,
-                inactiveIcon: <SortAlphaDownAlt />,
-                setState: setIsSortedByTitleFirst,
-                state: isSortedByTitleFirst,
-              },
-            ]}
+      <Searchbar handler={setSearch} />
+      <div className='flex flex-row justify-between'>
+        <FilterBar>
+          <StatefulIconButton
+            activeTitle='Sort by label descending!'
+            inactiveTitle='Sort by label ascending!'
+            activeIcon={<SortAlphaDownAlt />}
+            inactiveIcon={<SortAlphaDown />}
+            onActive={() => setOrder('asc')}
+            onInactive={() => setOrder('desc')}
           />
-        </div>
-        <ItemCounter itemCount={contact.search(lastSearch).length} />
+          <StatefulIconButton
+            activeTitle='Hide inactive contacts!'
+            inactiveTitle='Show inactive contacts!'
+            inactiveIcon={<PersonFillCheck />}
+            activeIcon={<PersonFillX />}
+            onActive={() => setDoShowInactive(false)}
+            onInactive={() => setDoShowInactive(true)}
+          />
+        </FilterBar>
+        <ItemCounter itemCount={count} />
       </div>
       <div className='flex flex-col items-center'>
         {isCreateMode ? (
-          <EditableCard
-            fields={fields.get()}
-            title='Create Contact'
-            onCancel={closeCreateMode}
-            onSubmit={createItem}
-          />
+          <EditableCard fields={fields.get()} title='Create Contact' onCancel={closeCreateMode} onSubmit={createItem} />
         ) : (
           <Button onClick={toggleCreateMode}>Create</Button>
         )}
-        {(isSortedByTitleFirst ? sortAscending : sortDescending)(
-          contact.search(lastSearch),
-          'nickname'
-        ).map((item) => (
-          <Card
-            key={item._id}
-            fields={fields.get(item)}
-            editableTitle='Update Entry'
-            title={item.title}
-            item={item}
-            onDelete={deleteItem}
-            onUpdate={updateItem}
-          />
+        {items.map((item) => (
+          <Card key={item.id} fields={fields.get(item)} editableTitle='Update Entry' isTitleHtml title={item.title} item={item} onDelete={deleteItem} onUpdate={updateItem} />
         ))}
+        <PaginationBar activePage={activePage} totalPages={totalPages} onPage={onPage} onPrev={onPrev} onNext={onNext} />
       </div>
     </>
   );

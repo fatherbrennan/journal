@@ -1,10 +1,15 @@
 import type { MouseEventHandler, ReactNode } from 'react';
 
-interface IconButtonProps {
+export interface IconButtonProps {
   /**
    * Icon. (SVG).
    */
   icon: ReactNode;
+
+  /**
+   * Icon button title.
+   */
+  title?: string;
 
   /**
    * True if button should be of type submit.
@@ -18,14 +23,15 @@ interface IconButtonProps {
   onClick?: MouseEventHandler<HTMLButtonElement>;
 }
 
-export default function IconButton(props: IconButtonProps) {
+export function IconButton({ icon, isSubmit, title, onClick }: IconButtonProps) {
   return (
     <button
-      className='select-none bg-zinc-200 hover:bg-zinc-300 rounded-xl py-2 px-2 h-8 w-8 flex justify-center items-center overflow-hidden mx-1'
-      type={props.isSubmit ? 'submit' : 'button'}
-      onClick={props.onClick}
+      className='flex items-center justify-center w-8 h-8 px-2 py-2 mx-1 overflow-hidden select-none bg-zinc-200 hover:bg-zinc-300 rounded-xl'
+      type={isSubmit ? 'submit' : 'button'}
+      title={title}
+      onClick={onClick}
     >
-      {props.icon}
+      {icon}
     </button>
   );
 }

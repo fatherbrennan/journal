@@ -1,62 +1,35 @@
-import { useContext, useEffect, useState } from 'react';
-import { SortNumericDown, SortNumericDownAlt } from 'react-bootstrap-icons';
+import { useEffect, useState } from 'react';
+import { CalendarCheck, CalendarX, SortNumericDown, SortNumericDownAlt } from 'react-bootstrap-icons';
 
-import {
-  Button,
-  Card,
-  EditableCard,
-  FilterBar,
-  Heading,
-  ItemCounter,
-  Searchbar,
-} from '../../components';
-import { JournalContext } from '../../context';
-import { JournalItem } from '../../context/Journal';
-import { Fields, sortAscending, sortDescending } from '../../utils';
+import { Button, CalendarButton, Card, EditableCard, FilterBar, Heading, ItemCounter, PaginationBar, Searchbar, StatefulIconButton } from '~/components';
+import { Db, date } from '~/db/utils';
+import { usePagination } from '~/hooks';
+import { DateUtils, Fields } from '~/utils';
 
-export default function () {
-  const journal = useContext(JournalContext);
-  const [isCreateMode, setIsCreateMode] = useState(false);
-  const [isSortedByLatestFirst, setIsSortedByLatestFirst] = useState(true);
-  // Track the last string searched
-  const [lastSearch, setLastSearch] = useState('');
-  const fields = new Fields<JournalItem>([
-    {
-      key: 'dateString',
-      label: 'Date String',
-      hasCard: false,
-      hasForm: false,
-      required: true,
-    },
-    {
-      key: 'date',
-      label: 'Date',
-      type: 'date',
-      hasCard: false,
-      isSrOnly: true,
-      required: true,
-    },
-    {
-      key: 'notes',
-      label: 'Notes',
-      type: 'note',
-      hasForm: true,
-      isSrOnly: true,
-      required: true,
-      autoFocus: true,
-    },
-  ]);
+import type { Journal } from '~/db/schema/journal';
+import type { SQLDate, SQLOrderKeys } from '~/db/utils';
 
+interface JournalFormData {
   /**
-   * Return an ISO date.
-   * @param ts Timestamp. If omitted, use current date.
-   * @returns Date formatted in ISO.
+   * ISO date string (YYYY-MM-DD).
    */
-  const dateISO = (ts?: number) => {
-    return (ts === undefined ? new Date() : new Date(ts))
-      .toISOString()
-      .split('T')[0];
-  };
+  date: string;
+  notes: string;
+}
+
+export function Dashboard() {
+  const [isCreateMode, setIsCreateMode] = useState<boolean>(false);
+  const [order, setOrder] = useState<SQLOrderKeys>('desc');
+  const [search, setSearch] = useState('');
+  const [dateBefore, setDateBefore] = useState<SQLDate>();
+  const [dateAfter, setDateAfter] = useState<SQLDate>();
+  const { activePage, count, items, itemsPerPage, handleDbResponse, onPage, onPrev, onNext, totalPages } = usePagination<Awaited<ReturnType<typeof Db.getJournals>>['result']>();
+
+  const fields = new Fields([
+    { key: 'dateString', label: 'Date String', hasCard: false, hasForm: false, required: true },
+    { key: 'date', label: 'Date', type: 'date', hasCard: false, isSrOnly: true, required: true },
+    { key: 'notes', label: 'Notes', type: 'note', hasForm: true, isSrOnly: true, required: true, autoFocus: true, isHtml: true },
+  ]);
 
   /**
    * Toggle create card visibility.
@@ -73,25 +46,13 @@ export default function () {
   };
 
   /**
-   * Update visible items based on input pattern.
-   * If `pattern` is omitted, the last known pattern is used.
-   * @param pattern Filter string.
-   */
-  const filterItems = (pattern?: string) => {
-    try {
-      setLastSearch(pattern === undefined ? lastSearch : pattern);
-    } catch (error) {
-      // Avoid invalid regexp patterns e.g. `abc[`
-      return;
-    }
-  };
-
-  /**
    * Delete item.
    * @param id Item identifier.
    */
-  const deleteItem = (id: string) => {
-    journal.delete(id);
+  const deleteItem = async (id: Journal['id']) => {
+    await Db.deleteJournal(id);
+
+    getJournals();
   };
 
   /**
@@ -99,56 +60,70 @@ export default function () {
    * @param data Form submit data.
    * @param id Item identifier.
    */
-  const updateItem = (data: any, id: string) => {
-    const date = new Date(data.date);
-    journal.update(id, {
-      date: journal.format(date),
+  const updateItem = async (data: JournalFormData, id: Journal['id']) => {
+    await Db.updateJournal(id, {
+      date: date(data.date),
       notes: data.notes,
-      ts: date.getTime(),
     });
+
+    getJournals();
   };
 
   /**
    * Create a new item.
    * @param data Form submit data.
    */
-  const createItem = (data: any) => {
-    const date = new Date(data.date);
-    journal.create({
-      date: journal.format(date),
-      notes: data.notes,
-      ts: date.getTime(),
+  const createItem = async (data: JournalFormData) => {
+    await Db.createJournal({
+      ...data,
+      date: date(data.date),
     });
+
+    getJournals();
     setIsCreateMode(false);
   };
 
+  /**
+   * Get journal items based on order and search.
+   */
+  const getJournals = () => {
+    Db.getJournals({
+      activePage,
+      itemsPerPage,
+      order,
+      search,
+      dateBefore,
+      dateAfter,
+    }).then(handleDbResponse);
+  };
+
   // Force refresh of visible entries on context update
-  useEffect(filterItems, [journal.store]);
+  useEffect(getJournals, [activePage, itemsPerPage, order, search, dateBefore, dateAfter]);
 
   return (
     <>
       <Heading value='Log' />
-      <Searchbar onSubmit={filterItems} onChange={filterItems} />
+      <Searchbar handler={setSearch} />
       <div className='flex flex-row justify-between'>
-        <div className='flex'>
-          <FilterBar
-            items={[
-              {
-                activeIcon: <SortNumericDown />,
-                inactiveIcon: <SortNumericDownAlt />,
-                setState: setIsSortedByLatestFirst,
-                state: isSortedByLatestFirst,
-              },
-            ]}
+        <FilterBar>
+          <StatefulIconButton
+            activeTitle='Sort by latest!'
+            inactiveTitle='Sort by oldest!'
+            activeIcon={<SortNumericDown />}
+            inactiveIcon={<SortNumericDownAlt />}
+            onActive={() => setOrder('desc')}
+            onInactive={() => setOrder('asc')}
           />
-        </div>
-        <ItemCounter itemCount={journal.search(lastSearch).length} />
+          <CalendarButton icon={<CalendarCheck />} label='Filter entries from start date!' handler={setDateBefore} />
+          <CalendarButton icon={<CalendarX />} label='Filter entries from end date!' handler={setDateAfter} />
+        </FilterBar>
+        <ItemCounter itemCount={count} />
       </div>
       <div className='flex flex-col items-center'>
         {isCreateMode ? (
           <EditableCard
             fields={fields.get({
-              date: dateISO(),
+              date: DateUtils.ISO(),
             })}
             title={'Create Entry'}
             onSubmit={createItem}
@@ -157,23 +132,21 @@ export default function () {
         ) : (
           <Button onClick={toggleCreateMode}>Create</Button>
         )}
-        {(isSortedByLatestFirst ? sortDescending : sortAscending)(
-          journal.search(lastSearch),
-          'ts'
-        ).map((item) => (
+        {items.map((item) => (
           <Card
-            key={item._id}
+            key={item.id}
             fields={fields.get({
-              date: dateISO(item.ts),
+              date: DateUtils.ISO(Number(item.ts)),
               notes: item.notes,
             })}
             editableTitle='Update Entry'
-            title={item.date}
+            title={DateUtils.format(Number(item.ts))}
             item={item}
             onDelete={deleteItem}
             onUpdate={updateItem}
           />
         ))}
+        <PaginationBar activePage={activePage} totalPages={totalPages} onPage={onPage} onPrev={onPrev} onNext={onNext} />
       </div>
     </>
   );

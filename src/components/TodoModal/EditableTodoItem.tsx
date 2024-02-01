@@ -1,8 +1,11 @@
-import { Form } from '..';
-import TodoItemCheckbox from './TodoItemCheckbox';
+import { Form } from '~/components';
+import { TodoItemCheckbox } from './TodoItemCheckbox';
 
-import { TodoItem } from '../../context/Todo';
-import { Fields } from '../../utils';
+import { Fields } from '~/utils';
+
+interface TodoItemFormData {
+  value: string;
+}
 
 interface EditableTodoItemProps {
   /**
@@ -22,29 +25,19 @@ interface EditableTodoItemProps {
   onSubmit: (data: any) => void;
 }
 
-export default function EditableTodoItem(props: EditableTodoItemProps) {
-  const fields = new Fields<TodoItem>([
-    {
-      key: 'value',
-      value: props.value,
-      label: 'Value',
-      isSrOnly: true,
-      required: true,
-      autoFocus: true,
-    },
-  ]);
+export function EditableTodoItem({ value, onCancel, onSubmit }: EditableTodoItemProps) {
+  const fields = new Fields([{ key: 'value', value: value, label: 'Value', isSrOnly: true, required: true, autoFocus: true }]);
 
   return (
-    <div className='group flex justify-between w-full my-2'>
+    <div className='flex w-full group'>
       <div className='flex flex-row items-center'>
-        {/* Just for aesthetics, click 'X' to cancel */}
         <TodoItemCheckbox isDisabled />
       </div>
       <Form
         fields={fields.get()}
-        className='flex flex-row-reverse w-full items-center justify-between ml-1'
-        onCancel={props.onCancel}
-        onSubmit={props.onSubmit}
+        className='flex flex-row-reverse items-center justify-between w-full ml-1'
+        onCancel={onCancel}
+        onSubmit={onSubmit}
         headerClassName=''
         formGroupClassName='flex-grow'
       />

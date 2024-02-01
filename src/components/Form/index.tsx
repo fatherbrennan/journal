@@ -1,10 +1,12 @@
-import { useForm } from 'react-hook-form';
+import { useState } from 'react';
 
-import { Check, X } from '../../icons';
-import IconButton from '../IconButton';
-import FormGroup from './FormGroup';
+import { IconButton } from '~/components/IconButton';
+import { Check, X } from '~/icons';
+import { FormGroup } from './FormGroup';
 
-import type { Field, HTMLElementClassName } from '../../../types/types';
+import type { FormEvent } from 'react';
+
+import type { Field, HTMLElementClassName } from '~/../types/types';
 
 interface FormProps {
   /**
@@ -15,7 +17,7 @@ interface FormProps {
   /**
    * Field options.
    */
-  fields: Array<Field>;
+  fields: Field[];
 
   /**
    * Form group class.
@@ -42,46 +44,49 @@ interface FormProps {
    * @param data Data from form as key:value.
    * @param event Submit event.
    */
-  onSubmit?: (data: any, event: any) => void;
+  onSubmit: (data: FormData, event: FormEvent<HTMLFormElement>) => void;
 }
+
+export interface FormData {
+  [key: Field['key']]: string | boolean;
+}
+
+export type FormDataHandler = (key: keyof FormData, value: FormData[keyof FormData]) => void;
 
 /**
  * Create a stateful form.
  */
-export default function Form(props: FormProps) {
-  const { handleSubmit, register } = useForm();
-  const onSubmit = props.onSubmit || (() => {});
+export function Form({ fields, className, formGroupClassName, headerClassName, onCancel, onSubmit, title }: FormProps) {
+  const [formData, setFormData] = useState<FormData>(
+    fields.reduce<FormData>((acc, curr) => {
+      if (curr.hasForm || curr.hasForm === undefined) {
+        acc[curr.key] = typeof curr.value !== 'boolean' || curr.value !== undefined ? (curr.value as string) : '';
+      }
+      return acc;
+    }, {})
+  );
+
+  const formHandler: FormDataHandler = (key, value) => {
+    setFormData((prevFormData) => ({ ...prevFormData, [key]: value }));
+  };
+
+  const handleFormSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    onSubmit(formData, event);
+  };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className={props.className}>
-      <div
-        className={
-          props.headerClassName === undefined
-            ? 'w-full flex justify-between mb-3'
-            : props.headerClassName
-        }
-      >
-        {props.title && (
-          <h5 className='mb-0 text-base font-semibold text-gray-900 md:text-xl'>
-            {props.title}
-          </h5>
-        )}
+    <form onSubmit={handleFormSubmit} className={className}>
+      <div className={headerClassName === undefined ? 'w-full flex justify-between mb-3' : headerClassName}>
+        {title && <h5 className='mb-0 text-base font-semibold text-gray-900 md:text-xl'>{title}</h5>}
         <div className='flex flex-row'>
           <IconButton isSubmit icon={<Check />} />
-          <IconButton onClick={props.onCancel} icon={<X />} />
+          <IconButton onClick={onCancel} icon={<X />} />
         </div>
       </div>
-      {props.fields.map(
-        (field) =>
-          (field.hasForm || field.hasForm === undefined) && (
-            <FormGroup
-              key={field.key}
-              field={field}
-              register={register}
-              className={props.formGroupClassName}
-            />
-          )
-      )}
+      {fields.map((field) => (field.hasForm || field.hasForm === undefined) && <FormGroup id={field.key} className={formGroupClassName} formHandler={formHandler} {...field} />)}
     </form>
   );
 }
+
+export { FormGroup };

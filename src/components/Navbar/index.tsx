@@ -1,11 +1,11 @@
 import { useContext } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 
-import { IconButton } from '..';
-import { TodoContext } from '../../context';
-import { Checklist, Journal } from '../../icons';
+import { IconButton } from '~/components';
+import { TodoContext } from '~/context';
+import { Checklist, Journal } from '~/icons';
 
-type Links = Array<{
+type Links = {
   /**
    * Link label.
    */
@@ -15,54 +15,41 @@ type Links = Array<{
    * Link route.
    */
   value: string;
-}>;
+}[];
 
-export default function Navbar() {
-  const todo = useContext(TodoContext);
+export function Navbar() {
+  const todoContext = useContext(TodoContext);
   const location = useLocation();
   const links: Links = [
     { label: 'Contacts', value: '/contacts' },
     { label: 'Library', value: '/library' },
-    { label: 'Todo', value: '/todo' },
+    { label: 'To Do', value: '/todo' },
   ];
 
   return (
-    <div className='backdrop-blur flex-none transition-colors duration-500 lg:z-50 lg:border-b lg:border-slate-900/10 bg-white/95 supports-backdrop-blur:bg-white/60'>
-      <div className='max-w-7x1 mx-auto'>
-        <div className='py-4 border-b border-slate-900/10 md:px-8 md:border-0 mx-4 md:mx-0'>
+    <div className='flex-none transition-colors duration-500 backdrop-blur lg:z-50 lg:border-b lg:border-slate-900/10 bg-white/95 supports-backdrop-blur:bg-white/60'>
+      <div className='mx-auto max-w-7x1'>
+        <div className='py-4 mx-4 border-b border-slate-900/10 md:px-8 md:border-0 md:mx-0'>
           <div className='relative flex items-center'>
-            <Link
-              className='mr-3 flex-none w-[2.0625rem] overflow-hidden md:w-auto'
-              to='/'
-            >
-              <span className='sr-only'>Journal Dashboard</span>
+            <Link className='mr-3 flex-none w-[2.0625rem] overflow-hidden md:w-auto h-8 flex items-center' to='/'>
+              <label className='sr-only'>Journal Dashboard</label>
               <Journal />
             </Link>
-            <div className='relative hidden md:flex items-center ml-auto'>
-              <nav className='text-sm leading-6 font-semibold text-slate-700'>
-                <ul className='flex space-x-8 items-center'>
+            <div className='relative items-center hidden ml-auto md:flex'>
+              <nav className='text-sm font-semibold leading-6 text-slate-700'>
+                <ul className='flex items-center space-x-8'>
                   {links.map((link) => (
                     <li key={link.value}>
-                      <Link
-                        className={'hover:text-teal-400 select-none'}
-                        to={link.value}
-                      >
+                      <Link className='select-none hover:text-teal-400' to={link.value}>
                         {link.label}
                       </Link>
                     </li>
                   ))}
-                  {/* Todo Modal */}
+                  {/* To Do Modal */}
                   <li>
-                    {/* Hide the Todo icon when on the Todo page. */}
+                    {/* Hide the To Do icon when on the To Do page. */}
                     {location.pathname !== '/todo' && (
-                      <IconButton
-                        icon={
-                          <Checklist
-                            className={todo.isActive ? 'fill-teal-400' : ''}
-                          />
-                        }
-                        onClick={todo.toggleVisibility}
-                      />
+                      <IconButton icon={<Checklist className={todoContext.isActive ? 'fill-teal-400' : ''} />} onClick={todoContext.toggleVisibility} />
                     )}
                   </li>
                 </ul>

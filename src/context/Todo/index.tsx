@@ -1,64 +1,39 @@
-import { createContext, useEffect, useState } from 'react';
+import { createContext, useState } from 'react';
 
-import { fsInitFromFile, fsWriteFile, TodoStore } from '../../utils';
+import type { Context, Dispatch, FC, PropsWithChildren, SetStateAction } from 'react';
 
-import type {
-  Context,
-  ContextProvider,
-  StoreContainer,
-} from '../../../types/types';
-
-export interface TodoItemValue {
-  /**
-   * Data.
-   */
-  value: string;
+interface TodoContextType {
+  isActive: boolean;
+  itemCount: number;
+  setItemCount: Dispatch<SetStateAction<number>>;
+  toggleVisibility: () => void;
 }
-
-export interface TodoItem extends TodoItemValue {
-  /**
-   * Array of subitems.
-   */
-  subItems: StoreContainer<TodoItemValue>;
-}
-
-/**
- * Todo context type.
- */
-type TodoContextType = TodoStore;
-
-// Get todo file contents and the absolute path to the todo file
-const [todoData, todoPath] = await fsInitFromFile<StoreContainer<TodoItem>>(
-  'todo.json',
-  []
-);
 
 // Initialize context
-const context: TodoContextType = new TodoStore();
+const context: TodoContextType = {
+  isActive: true,
+  itemCount: 0,
+  setItemCount: () => {},
+  toggleVisibility: () => {},
+};
 
-export const TodoContext: Context<TodoContextType> = createContext(context);
+export const TodoContext: Context<TodoContextType> = createContext<TodoContextType>(context);
 
-export const TodoContextProvider: ContextProvider = ({ children }) => {
-  const [store, setStore] = useState(todoData);
+export const TodoContextProvider: FC<PropsWithChildren> = ({ children }) => {
   const [isActive, setIsActive] = useState(false);
-  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [itemCount, setItemCount] = useState(0);
+
+  const toggleVisibility = () => {
+    setIsActive((prevIsActive) => !prevIsActive);
+  };
 
   // Populate context
-  const context: TodoContextType = new TodoStore({
-    setStore,
-    store,
+  const context: TodoContextType = {
     isActive,
-    setIsActive,
-    isFullscreen,
-    setIsFullscreen,
-  });
+    itemCount,
+    setItemCount,
+    toggleVisibility,
+  };
 
-  useEffect(() => {
-    // Update file every time store is updated
-    fsWriteFile(todoPath, store);
-  }, [store]);
-
-  return (
-    <TodoContext.Provider value={context}>{children}</TodoContext.Provider>
-  );
+  return <TodoContext.Provider value={context}>{children}</TodoContext.Provider>;
 };

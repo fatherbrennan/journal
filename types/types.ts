@@ -1,46 +1,13 @@
-import type {
-  FC,
-  HTMLAttributes,
-  PropsWithChildren,
-  Context as ReactContext,
-} from 'react';
+import type { HTMLAttributes } from 'react';
 
 /**
  * Plain object wrapper.
  */
 export type PlainObject<T> = { [key: string]: T };
 
-/**
- * Context.
- */
-export type Context<T> = ReactContext<T>;
-
-/**
- * Context provider.
- */
-export type ContextProvider = FC<PropsWithChildren>;
-
-interface UniqueIdentifier {
-  /**
-   * Item unique identifier.
-   */
-  _id: string;
-}
-
-/**
- * Array of items.
- */
-export interface StoreContainer<T> extends Array<T & UniqueIdentifier> {}
+type FormFieldType = 'boolean' | 'date' | 'note' | 'string';
 
 export type HTMLElementClassName = HTMLAttributes<HTMLElement>['className'];
-
-type FormFieldType =
-  | 'boolean'
-  | 'date'
-  | 'integer'
-  | 'note'
-  | 'number'
-  | 'string';
 
 export interface FormField {
   /**
@@ -107,4 +74,10 @@ export interface Field extends FormField {
    * @defaultValue `true`
    */
   cardIsSrOnly?: boolean;
+
+  /**
+   * If true, content will be sanitised and parsed as HTML.
+   * @defaultValue `false`
+   */
+  isHtml?: boolean;
 }
