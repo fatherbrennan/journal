@@ -18,7 +18,7 @@ export function TextArea({ formHandler, id, label, autoFocus, required, value }:
   const updateTextAgainstDictionary = (text: string): string => {
     for (let i = 0; i < dict.length; i++) {
       const { pattern, value } = dict[i];
-      text.replace(pattern, value);
+      text = text.replace(pattern, value);
     }
     return text;
   };
