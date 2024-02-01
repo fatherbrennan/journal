@@ -6,8 +6,7 @@ import { Db } from '~/db/utils';
 import { usePagination } from '~/hooks';
 import { Fields } from '~/utils';
 
-import { Contact } from '~/db/schema/contacts';
-
+import type { Contact } from '~/db/schema/contacts';
 import type { SQLOrderKeys } from '~/db/utils';
 
 interface ContactFormData {
@@ -24,7 +23,8 @@ export function Contacts() {
   const [doShowInactive, setDoShowInactive] = useState(false);
   const [order, setOrder] = useState<SQLOrderKeys>('asc');
   const [search, setSearch] = useState('');
-  const { activePage, count, items, itemsPerPage, handleDbResponse, onPage, onPrev, onNext, totalPages } = usePagination<Awaited<ReturnType<typeof Db.getContacts>>['result']>();
+  const { activePage, count, items, itemsPerPage, pageNumbers, rangeMin, rangeMax, handleDbResponse, onPage, onPrev, onNext } =
+    usePagination<Awaited<ReturnType<typeof Db.getContacts>>['result']>();
   const fields = new Fields([
     { key: 'title', label: 'Title', type: 'string', hasCard: false, required: true, isHtml: true, autoFocus: true },
     { key: 'nickname', label: 'Nickname', type: 'string', required: true, isHtml: true, cardIsSrOnly: false },
@@ -127,7 +127,7 @@ export function Contacts() {
         {items.map((item) => (
           <Card key={item.id} fields={fields.get(item)} editableTitle='Update Entry' isTitleHtml title={item.title} item={item} onDelete={deleteItem} onUpdate={updateItem} />
         ))}
-        <PaginationBar activePage={activePage} totalPages={totalPages} onPage={onPage} onPrev={onPrev} onNext={onNext} />
+        <PaginationBar activePage={activePage} pageNumbers={pageNumbers} rangeMin={rangeMin} rangeMax={rangeMax} onPage={onPage} onPrev={onPrev} onNext={onNext} />
       </div>
     </>
   );

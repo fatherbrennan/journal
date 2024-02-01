@@ -23,7 +23,8 @@ export function Dashboard() {
   const [search, setSearch] = useState('');
   const [dateBefore, setDateBefore] = useState<SQLDate>();
   const [dateAfter, setDateAfter] = useState<SQLDate>();
-  const { activePage, count, items, itemsPerPage, handleDbResponse, onPage, onPrev, onNext, totalPages } = usePagination<Awaited<ReturnType<typeof Db.getJournals>>['result']>();
+  const { activePage, count, items, itemsPerPage, pageNumbers, rangeMin, rangeMax, handleDbResponse, onPage, onPrev, onNext } =
+    usePagination<Awaited<ReturnType<typeof Db.getJournals>>['result']>();
 
   const fields = new Fields([
     { key: 'dateString', label: 'Date String', hasCard: false, hasForm: false, required: true },
@@ -146,7 +147,7 @@ export function Dashboard() {
             onUpdate={updateItem}
           />
         ))}
-        <PaginationBar activePage={activePage} totalPages={totalPages} onPage={onPage} onPrev={onPrev} onNext={onNext} />
+        <PaginationBar activePage={activePage} pageNumbers={pageNumbers} rangeMin={rangeMin} rangeMax={rangeMax} onPage={onPage} onPrev={onPrev} onNext={onNext} />
       </div>
     </>
   );
