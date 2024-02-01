@@ -48,6 +48,7 @@ interface JSONTodo {
     todosSubitems: { jsonPath: 'todo.json', sqlPath: 'todos_subitems.sql', sqlTableName: 'todos_subitems' },
   };
   const dict = [
+    { value: "''", pattern: /'/g },
     { value: 'Patrick', pattern: /\bpatrick\b/g },
     { value: 'filter', pattern: /\bphilter\b/g },
     { value: 'am', pattern: /(?<=\d)\sAM\b/g },
@@ -56,7 +57,7 @@ interface JSONTodo {
   const updateTextAgainstDictionary = (text: string): string => {
     for (let i = 0; i < dict.length; i++) {
       const { pattern, value } = dict[i];
-      text.replace(pattern, value);
+      text = text.replace(pattern, value);
     }
     return text;
   };
