@@ -37,7 +37,7 @@ export type DbTables = DbTableSchema[keyof DbTableSchema];
 export type DbTableNames = DbTables['_']['name'];
 
 export class DbBase {
-  private static name: string = 'journal.db';
+  private static dbName: string = 'journal.db';
   private static connection: Database | null = null;
   private static hasInitSchemaThisConnection: boolean = false;
   public static client = drizzle(
@@ -92,7 +92,7 @@ export class DbBase {
   private static async connect(): Promise<Database> {
     try {
       if (!this.connection) {
-        this.connection = await Database.load(`sqlite:${this.name}`);
+        this.connection = await Database.load(`sqlite:${this.dbName}`);
       }
 
       // Perform initial setup, and possibly create initial schema in database
