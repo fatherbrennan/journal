@@ -1,8 +1,11 @@
-import { useEffect, useId, useState } from 'react';
+import { useContext, useEffect, useId, useRef, useState } from 'react';
 
+import { KeyBindingContext } from '~/context';
 import { Search } from '~/icons';
 
 import type { ChangeEvent } from 'react';
+
+import type { KeyBindingObject } from '~/context';
 
 interface SearchbarProps {
   /**
@@ -14,8 +17,11 @@ interface SearchbarProps {
 }
 
 export function Searchbar({ handler }: SearchbarProps) {
-  const [value, setValue] = useState('');
+  const [value, setValue] = useState<string>('');
+  const [isFocused, setIsFocused] = useState<boolean>(false);
   const [timeoutId, setTimeoutId] = useState<number | null>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const keyBindingContext = useContext(KeyBindingContext);
   const id = useId();
 
   /**
@@ -45,8 +51,24 @@ export function Searchbar({ handler }: SearchbarProps) {
     setTimeoutId(window.setTimeout(() => handler(uniqueSearchWords, event), 200));
   };
 
+  useEffect(() => {
+    const binding: KeyBindingObject = {
+      key: '/',
+      handler: (event) => {
+        if (!isFocused) {
+          event.preventDefault();
+          inputRef.current?.focus();
+        }
+      },
+    };
+
+    keyBindingContext.add(binding);
+
+    return () => keyBindingContext.remove(binding);
+  }, [isFocused]);
+
   // Clear existing timeout if the component is unloaded
-  useEffect(() => () => clearTimeoutById());
+  useEffect(() => () => clearTimeoutById(), []);
 
   return (
     <div className='flex flex-col items-center w-full mb-6'>
@@ -63,12 +85,15 @@ export function Searchbar({ handler }: SearchbarProps) {
         <div className='relative w-full'>
           <div className='absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none'>{<Search />}</div>
           <input
+            ref={inputRef}
             type='text'
             id={id}
             className='bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5 '
             placeholder='Search'
             value={value}
             onChange={onChange}
+            onFocus={() => setIsFocused(true)}
+            onBlur={() => setIsFocused(false)}
           />
         </div>
       </form>

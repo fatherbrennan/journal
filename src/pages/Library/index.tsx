@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react';
 import { SortAlphaDown, SortAlphaDownAlt } from 'react-bootstrap-icons';
 
-import { Button, Card, EditableCard, FilterBar, Heading, ItemCounter, Searchbar, StatefulIconButton } from '~/components';
-import { Library } from '~/db/schema/library';
+import { Button, Card, EditableCard, FilterBar, Heading, ItemCounter, PaginationBar, Searchbar, StatefulIconButton } from '~/components';
 import { Db } from '~/db/utils/db';
 import { usePagination } from '~/hooks';
 import { Fields } from '~/utils';
 
+import type { Library } from '~/db/schema/library';
 import type { SQLOrderKeys } from '~/db/utils';
 
 interface LibraryFormData {
@@ -18,7 +18,8 @@ export function Library() {
   const [isCreateMode, setIsCreateMode] = useState(false);
   const [order, setOrder] = useState<SQLOrderKeys>('asc');
   const [search, setSearch] = useState('');
-  const { activePage, count, items, itemsPerPage, handleDbResponse, onPage, onPrev, onNext, totalPages } = usePagination<Awaited<ReturnType<typeof Db.getLibrary>>['result']>();
+  const { activePage, count, items, itemsPerPage, pageNumbers, rangeMin, rangeMax, handleDbResponse, onPage, onPrev, onNext } =
+    usePagination<Awaited<ReturnType<typeof Db.getLibrary>>['result']>();
   const fields = new Fields([
     { key: 'label', label: 'Label', required: true, isHtml: true, hasCard: false, autoFocus: true },
     { key: 'value', label: 'Value', required: true, type: 'note' },
@@ -108,6 +109,7 @@ export function Library() {
         {items.map((item) => (
           <Card key={item.id} editableTitle='Update Item' fields={fields.get(item)} item={item} isTitleHtml title={item.label} onDelete={deleteItem} onUpdate={updateItem} />
         ))}
+        <PaginationBar activePage={activePage} pageNumbers={pageNumbers} rangeMin={rangeMin} rangeMax={rangeMax} onPage={onPage} onPrev={onPrev} onNext={onNext} />
       </div>
     </>
   );

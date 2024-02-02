@@ -2,6 +2,19 @@
 
 All notable changes to "Journal" will be documented in this file.
 
+## [2.1.0] - 2024-02-02
+
+### Added
+
+- Add `/` key bind to move focus into searchbar.
+
+### Fixed
+
+- Fix textarea not updating input text based on internal dictionary.
+- Fix broken query to get total number of valid records.
+- Fix broken pagination.
+  - Pagination would break when filtering items which amount to less pages than the current active page.
+
 ## [2.0.0] - 2024-02-01
 
 ### Added
