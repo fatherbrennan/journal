@@ -84,7 +84,7 @@ export class Db {
   }
 
   public static async deleteJournal(recordId: Journal['id']) {
-    return await DbBase.client.update(journal).set(sd<undefined>()).where(eq(journal.id, recordId));
+    return await DbBase.client.update(journal).set(sd(undefined, true)).where(eq(journal.id, recordId));
   }
 
   public static async updateJournal(recordId: Journal['id'], record: NewJournal) {
