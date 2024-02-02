@@ -2,7 +2,7 @@
 
 A digital journal to record meaningful occurrences, contacts, items and miscellaneous details.
 
-![journal-dashboard](/images/journal_dashboard.png)
+![journal-dashboard](/images/journal_dashboard.gif)
 
 ## Install
 
