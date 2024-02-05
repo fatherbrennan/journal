@@ -4,37 +4,7 @@ import Database from 'tauri-plugin-sql-api';
 
 import rawSql from '~/db/drizzle/0000_uneven_hannibal_king.sql?raw';
 import rawSql1 from '~/db/drizzle/0001_icy_loners.sql?raw';
-import { contacts } from '~/db/schema/contacts';
-import { journal } from '~/db/schema/journal';
-import { library } from '~/db/schema/library';
-import { todos, todosRelations } from '~/db/schema/todos';
-import { todosSubitems, todosSubitemsRelations } from '~/db/schema/todos_subitems';
-import { fts5Contacts } from '~/db/schema/virtual/fts5_contacts';
-import { fts5Journal } from '~/db/schema/virtual/fts5_journal';
-import { fts5Library } from '~/db/schema/virtual/fts5_library';
-
-const tableSchema = {
-  contacts,
-  journal,
-  library,
-  todos,
-  todosSubitems,
-  fts5Contacts,
-  fts5Journal,
-  fts5Library,
-};
-
-const schema = {
-  ...tableSchema,
-  todosRelations,
-  todosSubitemsRelations,
-};
-
-export type DbTableSchema = typeof tableSchema;
-
-export type DbTables = DbTableSchema[keyof DbTableSchema];
-
-export type DbTableNames = DbTables['_']['name'];
+import { schema } from '~/db/utils';
 
 export class DbBase {
   private static dbName: string = 'journal.db';

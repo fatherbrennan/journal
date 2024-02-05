@@ -15,7 +15,7 @@ import type { Journal, NewJournal } from '~/db/schema/journal';
 import type { Library, NewLibrary } from '~/db/schema/library';
 import type { NewTodos, Todos } from '~/db/schema/todos';
 import type { NewTodoSubitem, TodoSubitem } from '~/db/schema/todos_subitems';
-import type { SQLDate } from '~/db/utils';
+import type { SQLDate } from '~/db/types';
 
 export const SQLOrder = {
   asc: asc,

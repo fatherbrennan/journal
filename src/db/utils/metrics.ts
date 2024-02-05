@@ -1,8 +1,10 @@
 import { integer } from 'drizzle-orm/sqlite-core';
 
-import { date } from '~/db/utils';
+import { date } from '~/db/utils/date';
 
-import type { SQLDate } from '~/db/utils';
+import type { DbTableNames, SQLDate, SQLiteTableBuilder } from '~/db/types';
+
+export type SQLiteTableMetrics = SQLiteTableBuilder<DbTableNames, typeof tableMetrics>;
 
 export const tableMetrics = {
   createdAt: integer('created_at', { mode: 'timestamp' }).notNull().default(date()).$type<SQLDate>(),

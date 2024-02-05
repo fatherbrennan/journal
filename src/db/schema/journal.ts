@@ -4,7 +4,7 @@ import { tableMetrics } from '~/db/utils/metrics';
 
 import type { InferInsertModel, InferSelectModel } from 'drizzle-orm';
 
-import type { SQLDate } from '~/db/utils';
+import type { SQLDate } from '~/db/types';
 
 export const journal = sqliteTable('journal', {
   id: integer('id', { mode: 'number' }).primaryKey({ autoIncrement: true }),
