@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Bookmark, BookmarkFill, CalendarCheck, CalendarX, SortNumericDown, SortNumericDownAlt } from 'react-bootstrap-icons';
+import { Bookmark, BookmarkCheck, CalendarCheck, CalendarX, SortNumericDown, SortNumericDownAlt } from 'react-bootstrap-icons';
 
 import { Button, CalendarButton, Card, EditableCard, FilterBar, Heading, ItemCounter, PaginationBar, Searchbar, StatefulIconButton } from '~/components';
 import { Db, date } from '~/db/utils';
@@ -131,7 +131,7 @@ export function Dashboard() {
           <StatefulIconButton
             activeTitle='Only show bookmarked items!'
             inactiveTitle='Show all items!'
-            activeIcon={<BookmarkFill />}
+            activeIcon={<BookmarkCheck />}
             inactiveIcon={<Bookmark />}
             onActive={() => setDoShowBookmarkedOnly(false)}
             onInactive={() => setDoShowBookmarkedOnly(true)}

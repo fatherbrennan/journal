@@ -1,5 +1,5 @@
 import {
-  BookmarkFill as BookmarkFillIcon,
+  BookmarkCheck as BookmarkCheckIcon,
   Bookmark as BookmarkIcon,
   Check as CheckIcon,
   CardChecklist as ChecklistIcon,
@@ -85,5 +85,5 @@ export const Bookmark = () => {
 };
 
 export const BookmarkFill = () => {
-  return <BookmarkFillIcon className={theme.md} fill={theme.fill} />;
+  return <BookmarkCheckIcon className={theme.md} fill={theme.fill} />;
 };

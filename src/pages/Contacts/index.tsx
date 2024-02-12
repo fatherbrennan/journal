@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { PersonFillCheck, PersonFillX, SortAlphaDown, SortAlphaDownAlt } from 'react-bootstrap-icons';
+import { PersonCheck, PersonX, SortAlphaDown, SortAlphaDownAlt } from 'react-bootstrap-icons';
 
 import { Button, Card, EditableCard, FilterBar, Heading, ItemCounter, PaginationBar, Searchbar, StatefulIconButton } from '~/components';
 import { Db } from '~/db/utils';
@@ -110,8 +110,8 @@ export function Contacts() {
           <StatefulIconButton
             activeTitle='Hide inactive contacts!'
             inactiveTitle='Show inactive contacts!'
-            inactiveIcon={<PersonFillCheck />}
-            activeIcon={<PersonFillX />}
+            inactiveIcon={<PersonCheck />}
+            activeIcon={<PersonX />}
             onActive={() => setDoShowInactive(false)}
             onInactive={() => setDoShowInactive(true)}
           />
