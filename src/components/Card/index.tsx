@@ -2,11 +2,11 @@ import DomPurify from 'dompurify';
 import { useState } from 'react';
 
 import { EditableCard, IconButton } from '~/components';
-import { Bin, Check, Edit, X } from '~/icons';
+import { Bin, Bookmark, BookmarkFill, Check, Edit, X } from '~/icons';
 
 import type { Field, PlainObject } from '~/../types/types';
 
-interface CardProps {
+interface CardPropsShared {
   /**
    * Field options.
    */
@@ -46,15 +46,33 @@ interface CardProps {
   onUpdate: (data: any, id: number) => void;
 }
 
-export function Card({ editableTitle, fields, item, isTitleHtml, title, onDelete, onUpdate }: CardProps) {
+interface CardProps extends CardPropsShared {
+  bookmark?: {
+    /**
+     * @default false
+     */
+    isBookmarked: boolean;
+    onBookmark: () => void;
+  };
+}
+
+export function Card({ editableTitle, fields, bookmark, item, isTitleHtml, title, onDelete, onUpdate }: CardProps) {
   const [isUpdateMode, setIsUpdateMode] = useState(false);
   const [isDeleteMode, setIsDeleteMode] = useState(false);
+  const isBookmarked = bookmark?.isBookmarked ?? false;
 
   const santitizeHtml = (html: string) => ({
     __html: DomPurify.sanitize(html, {
       ALLOWED_TAGS: ['mark'],
     }),
   });
+
+  /**
+   * Bookmark item.
+   */
+  const bookmarkItem = () => {
+    bookmark!.onBookmark();
+  };
 
   /**
    * Delete item.
@@ -108,6 +126,7 @@ export function Card({ editableTitle, fields, item, isTitleHtml, title, onDelete
             </>
           ) : (
             <>
+              {bookmark && <IconButton onClick={bookmarkItem} icon={isBookmarked ? <BookmarkFill /> : <Bookmark />} />}
               <IconButton onClick={attemptUpdateItem} icon={<Edit />} />
               <IconButton onClick={() => setIsDeleteMode(true)} icon={<Bin />} />
             </>

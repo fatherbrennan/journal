@@ -32,6 +32,7 @@ export class Db {
     itemsPerPage,
     order,
     search,
+    doShowBookmarkedOnly,
     dateAfter,
     dateBefore,
   }: {
@@ -39,6 +40,7 @@ export class Db {
     itemsPerPage: number;
     order: SQLOrderKeys;
     search: string;
+    doShowBookmarkedOnly: boolean;
     dateAfter?: SQLDate;
     dateBefore?: SQLDate;
   }) {
@@ -46,17 +48,20 @@ export class Db {
     const orderBy = [orderByFn(journal.date), orderByFn(journal.createdAt)];
     const offset = getOffset(activePage, itemsPerPage);
     const whereConditions = [];
+    doShowBookmarkedOnly && whereConditions.push(eq(journal.isBookmarked, true));
     search && whereConditions.push(match<typeof fts5Journal>('fts5_journal', search, 'notes'));
     const where = and(sd(journal), dateBefore ? gt(journal.date, dateBefore) : undefined, dateAfter ? lt(journal.date, dateAfter) : undefined, ...whereConditions);
     const select = search
       ? {
           id: journal.id,
           ts: journal.date,
+          isBookmarked: journal.isBookmarked,
           notes: highlight<typeof fts5Journal>('fts5_journal', 1),
         }
       : {
           id: journal.id,
           ts: journal.date,
+          isBookmarked: journal.isBookmarked,
           notes: journal.notes,
         };
     const from = search ? fts5Journal : journal;

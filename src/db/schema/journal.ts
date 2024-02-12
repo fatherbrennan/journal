@@ -10,6 +10,7 @@ export const journal = sqliteTable('journal', {
   id: integer('id', { mode: 'number' }).primaryKey({ autoIncrement: true }),
   date: integer('date', { mode: 'timestamp' }).notNull().$type<SQLDate | Date>(),
   notes: text('notes', { mode: 'text' }),
+  isBookmarked: integer('is_bookmarked', { mode: 'boolean' }).notNull().default(false),
   ...tableMetrics,
 });
 

@@ -1,4 +1,6 @@
 import {
+  BookmarkFill as BookmarkFillIcon,
+  Bookmark as BookmarkIcon,
   Check as CheckIcon,
   CardChecklist as ChecklistIcon,
   PencilSquare as PencilSquareIcon,
@@ -76,4 +78,12 @@ export const Search = () => {
 
 export const X = () => {
   return <XIcon className={theme.md} fill={theme.fill} />;
+};
+
+export const Bookmark = () => {
+  return <BookmarkIcon className={theme.md} fill={theme.fill} />;
+};
+
+export const BookmarkFill = () => {
+  return <BookmarkFillIcon className={theme.md} fill={theme.fill} />;
 };
