@@ -1,11 +1,12 @@
-import { useContext, useEffect, useId, useRef, useState } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
 
-import { KeyBindingContext } from '~/context';
+import { AppStates } from '~/context/KeyBinding';
+import { useKeybinding } from '~/hooks';
 import { Search } from '~/icons';
 
 import type { ChangeEvent } from 'react';
 
-import type { KeyBindingObject } from '~/context';
+import type { KeyBindingCreateObject } from '~/context';
 
 interface SearchbarProps {
   /**
@@ -18,10 +19,9 @@ interface SearchbarProps {
 
 export function Searchbar({ handler }: SearchbarProps) {
   const [value, setValue] = useState<string>('');
-  const [isFocused, setIsFocused] = useState<boolean>(false);
   const [timeoutId, setTimeoutId] = useState<number | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-  const keyBindingContext = useContext(KeyBindingContext);
+  const { deleteKeyBindings, setKeyBindings, setAppState } = useKeybinding();
   const id = useId();
 
   /**
@@ -52,20 +52,29 @@ export function Searchbar({ handler }: SearchbarProps) {
   };
 
   useEffect(() => {
-    const binding: KeyBindingObject = {
-      key: '/',
-      handler: (event) => {
-        if (!isFocused) {
+    const bindings: KeyBindingCreateObject[] = [
+      {
+        key: '/',
+        hasFocusInField: false,
+        handler: (event) => {
           event.preventDefault();
           inputRef.current?.focus();
-        }
+        },
       },
-    };
+      {
+        key: 'Escape',
+        hasFocusInField: true,
+        handler: (event) => {
+          event.preventDefault();
+          inputRef.current?.blur();
+        },
+      },
+    ];
 
-    keyBindingContext.add(binding);
+    setKeyBindings(bindings);
 
-    return () => keyBindingContext.remove(binding);
-  }, [isFocused]);
+    return () => deleteKeyBindings(bindings);
+  }, []);
 
   // Clear existing timeout if the component is unloaded
   useEffect(() => () => clearTimeoutById(), []);
@@ -92,8 +101,8 @@ export function Searchbar({ handler }: SearchbarProps) {
             placeholder='Search'
             value={value}
             onChange={onChange}
-            onFocus={() => setIsFocused(true)}
-            onBlur={() => setIsFocused(false)}
+            onFocus={() => setAppState(AppStates.hasFocusInField, true)}
+            onBlur={() => setAppState(AppStates.hasFocusInField, false)}
           />
         </div>
       </form>
