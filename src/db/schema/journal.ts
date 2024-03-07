@@ -3,6 +3,7 @@ import { integer, sqliteTable, text } from 'drizzle-orm/sqlite-core';
 import { tableMetrics } from '~/db/utils/metrics';
 
 import type { InferInsertModel, InferSelectModel } from 'drizzle-orm';
+import type { SQLiteUpdateSetSource } from 'drizzle-orm/sqlite-core';
 
 import type { SQLDate } from '~/db/types';
 
@@ -17,3 +18,5 @@ export const journal = sqliteTable('journal', {
 export type Journal = InferSelectModel<typeof journal>;
 
 export type NewJournal = InferInsertModel<typeof journal>;
+
+export type SetJournal = SQLiteUpdateSetSource<typeof journal>;

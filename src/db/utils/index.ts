@@ -13,5 +13,6 @@ export { highlight } from '~/db/utils/highlight';
 export { match } from '~/db/utils/match';
 export { schema, tableSchema } from '~/db/utils/schema';
 export { sd } from '~/db/utils/sd';
+export { Theme, themes } from '~/db/utils/theme';
 
 export type { SQLOrderKeys, SQLOrderValues } from '~/db/utils/db';

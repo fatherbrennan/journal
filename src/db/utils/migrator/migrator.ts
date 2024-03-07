@@ -1,12 +1,14 @@
 import migration0 from '~/db/drizzle/0000_uneven_hannibal_king.sql?raw';
 import migration1 from '~/db/drizzle/0001_icy_loners.sql?raw';
 import migration2 from '~/db/drizzle/0002_motionless_punisher.sql?raw';
+import migration3 from '~/db/drizzle/0003_misty_the_hunter.sql?raw';
 import journal from '~/db/drizzle/meta/_journal.json';
 
 const migration = {
   '0000_uneven_hannibal_king': migration0,
   '0001_icy_loners': migration1,
   '0002_motionless_punisher': migration2,
+  '0003_misty_the_hunter': migration3,
 };
 
 export interface MigrationMeta {

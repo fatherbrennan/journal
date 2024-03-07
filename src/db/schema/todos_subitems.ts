@@ -5,6 +5,7 @@ import { todos } from '~/db/schema/todos';
 import { tableMetrics } from '~/db/utils/metrics';
 
 import type { InferInsertModel, InferSelectModel } from 'drizzle-orm';
+import type { SQLiteUpdateSetSource } from 'drizzle-orm/sqlite-core';
 
 export const todosSubitems = sqliteTable('todos_subitems', {
   id: integer('id', { mode: 'number' }).primaryKey({ autoIncrement: true }),
@@ -19,6 +20,8 @@ export const todosSubitems = sqliteTable('todos_subitems', {
 export type TodoSubitem = InferSelectModel<typeof todosSubitems>;
 
 export type NewTodoSubitem = InferInsertModel<typeof todosSubitems>;
+
+export type SetTodoSubitem = SQLiteUpdateSetSource<typeof todos>;
 
 export const todosSubitemsRelations = relations(todosSubitems, ({ one }) => ({
   todo: one(todos, {

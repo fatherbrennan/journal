@@ -2,13 +2,14 @@ import { Fragment, useContext, useEffect, useState } from 'react';
 
 import { Button, ItemCounter } from '~/components';
 import { TodoContext } from '~/context';
-import { Db } from '~/db/utils';
+import { Db, Theme } from '~/db/utils';
 import { usePagination } from '~/hooks';
 import { EditableTodoItem } from './EditableTodoItem';
 import { TodoItem } from './TodoItem';
 
 import type { Todos } from '~/db/schema/todos';
 import type { TodoSubitem } from '~/db/schema/todos_subitems';
+import type { ThemeTypeKeys } from '~/db/utils/theme';
 
 interface TodoListProps {
   /**
@@ -103,6 +104,16 @@ export function TodoList({ doHideItemCount = false }: TodoListProps) {
   };
 
   /**
+   * Update item theme.
+   * @param theme New theme.
+   * @param id Item identifier.
+   */
+  const updateItemTheme = async (theme: ThemeTypeKeys, id: Todos['id']) => {
+    await Db.updateTodo(id, { theme });
+    getTodos();
+  };
+
+  /**
    * Create a new item.
    * @param data Form submit data.
    */
@@ -139,7 +150,17 @@ export function TodoList({ doHideItemCount = false }: TodoListProps) {
       <div className='overflow-auto'>
         {items.map((item) => (
           <Fragment key={item.id}>
-            <TodoItem id={item.id} value={item.value} isChecked={item.isChecked} onCreate={setCreateSubitemId} onCheck={checkItem} onDelete={deleteItem} onSubmit={updateItem} />
+            <TodoItem
+              id={item.id}
+              value={item.value}
+              theme={Theme[item.theme]}
+              isChecked={item.isChecked}
+              onCreate={setCreateSubitemId}
+              onCheck={checkItem}
+              onDelete={deleteItem}
+              onTheme={updateItemTheme}
+              onSubmit={updateItem}
+            />
             {(item.subitems.length > 0 || createSubitemId !== undefined) && (
               <div className='pl-6'>
                 {item.subitems.map((subitem) => (
@@ -147,6 +168,7 @@ export function TodoList({ doHideItemCount = false }: TodoListProps) {
                     key={item.id + subitem.id}
                     id={subitem.id}
                     value={subitem.value}
+                    theme={Theme[item.theme]}
                     isChecked={subitem.isChecked}
                     onDelete={deleteSubitem}
                     onCheck={checkSubitem}
