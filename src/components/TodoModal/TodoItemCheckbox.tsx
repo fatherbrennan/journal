@@ -37,25 +37,13 @@ export function TodoItemCheckbox({ theme, onClick, ...props }: TodoItemCheckboxP
   const isChecked = !!props.isChecked;
   const isDisabled = !!props.isDisabled;
   const className = 'flex items-center justify-center w-5 h-5 rounded-full';
-
-  !theme && (theme = Theme.default);
+  const statusTheme = (theme ?? Theme.default).checkbox[isCheckActive ? 'active' : isChecked ? 'checked' : 'default'];
 
   return (
-    <div
-      className={`flex items-center justify-center mx-1 border rounded-full select-none min-h-7 max-h-7 min-w-7 max-w-7${
-        isChecked ? ` ${theme.checkbox.checked.border}` : ` ${theme.checkbox.default.border}`
-      }`}
-    >
+    <div className={`flex items-center justify-center mx-1 border rounded-full select-none min-h-7 max-h-7 min-w-7 max-w-7 ${statusTheme.border}`}>
       {!isDisabled ? (
-        <button
-          className={`${className}${
-            isCheckActive ? ` ${theme.checkbox.checked.backgroundColor} ${theme.checkbox.checked.hover.backgroundColor}` : ` ${theme.checkbox.default.hover.backgroundColor}`
-          }`}
-          type='button'
-          title={`Mark Item as ${isChecked ? 'Inc' : 'C'}omplete!`}
-          onClick={onClick}
-        >
-          <CheckLg className={isCheckActive ? theme.checkbox.checked.check : `${theme.checkbox.default.check} ${theme.checkbox.default.hover.check}`} />
+        <button className={`${className} ${statusTheme.backgroundColor}`} type='button' title={`Mark Item as ${isChecked ? 'Inc' : 'C'}omplete!`} onClick={onClick}>
+          <CheckLg className={statusTheme.check} />
         </button>
       ) : (
         <span className={className}></span>

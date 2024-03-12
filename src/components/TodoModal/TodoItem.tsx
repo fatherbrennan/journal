@@ -155,7 +155,7 @@ export function TodoItem({ id, value, theme, isSubitem = false, isChecked = fals
       ) : (
         <div className='flex flex-row items-center w-full rounded-lg hover:bg-primary'>
           <TodoItemCheckbox theme={theme} isChecked={isChecked} isCheckActive={isCheckMode} onClick={isCheckMode ? cancelCheckItem : attemptCheckItem} />
-          <label className={`flex-grow overflow-auto${isChecked ? ' text-gray-400' : ''}`}>{value}</label>
+          <label className={`flex-grow overflow-auto${isChecked ? ' opacity-50' : ''}`}>{value}</label>
           <div className='flex invisible group-hover:visible'>
             {isChecked ? (
               isDeleteMode ? (

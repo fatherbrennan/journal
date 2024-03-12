@@ -96,5 +96,5 @@ export const BookmarkFill = () => {
 };
 
 export const CircleFill = ({ overrideTheme }: { overrideTheme: ThemeTypeValue }) => {
-  return <CircleFillIcon className={`${theme.md} ${overrideTheme.checkbox.default.check}`} fill={theme.fill} />;
+  return <CircleFillIcon className={`${theme.md} ${overrideTheme.fill}`} fill={theme.fill} />;
 };
