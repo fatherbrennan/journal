@@ -2,7 +2,7 @@
   "name": "journal",
   "description": "A digital journal to record meaningful occurrences.",
   "private": true,
-  "version": "2.0.0",
+  "version": "2.2.0",
   "license": "MIT",
   "type": "module",
   "scripts": {

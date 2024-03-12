@@ -2,6 +2,25 @@
 
 All notable changes to "Journal" will be documented in this file.
 
+## [2.2.0] - 2024-03-13
+
+### Added
+
+- Database migration functionality.
+- To Do themes.
+  - default (gray)
+  - teal
+  - lime
+  - orange
+  - pink
+  - blue
+  - violet
+
+### Fixed
+
+- App key bindings now have reference to app states.
+- Swap filled icons for non-filled icons.
+
 ## [2.1.0] - 2024-02-02
 
 ### Added
