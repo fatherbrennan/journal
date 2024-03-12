@@ -1,6 +1,10 @@
 import {
+  BookmarkCheck as BookmarkCheckIcon,
+  Bookmark as BookmarkIcon,
   Check as CheckIcon,
   CardChecklist as ChecklistIcon,
+  CircleFill as CircleFillIcon,
+  Palette as PaletteIcon,
   PencilSquare as PencilSquareIcon,
   Plus as PlusIcon,
   Search as SearchIcon,
@@ -9,6 +13,7 @@ import {
 } from 'react-bootstrap-icons';
 
 import type { HTMLElementClassName } from '~/../types/types';
+import type { ThemeTypeValue } from '~/db/utils/theme';
 
 interface Theme {
   /**
@@ -66,6 +71,10 @@ export const Edit = () => {
   return <PencilSquareIcon className={theme.sm} fill={theme.fill} />;
 };
 
+export const Palette = () => {
+  return <PaletteIcon className={theme.md} fill={theme.fill} />;
+};
+
 export const Plus = () => {
   return <PlusIcon className={theme.md} fill={theme.fill} />;
 };
@@ -76,4 +85,16 @@ export const Search = () => {
 
 export const X = () => {
   return <XIcon className={theme.md} fill={theme.fill} />;
+};
+
+export const Bookmark = () => {
+  return <BookmarkIcon className={theme.md} fill={theme.fill} />;
+};
+
+export const BookmarkFill = () => {
+  return <BookmarkCheckIcon className={theme.md} fill={theme.fill} />;
+};
+
+export const CircleFill = ({ overrideTheme }: { overrideTheme: ThemeTypeValue }) => {
+  return <CircleFillIcon className={`${theme.md} ${overrideTheme.fill}`} fill={theme.fill} />;
 };

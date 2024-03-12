@@ -3,6 +3,7 @@ import { integer, sqliteTable, text } from 'drizzle-orm/sqlite-core';
 import { tableMetrics } from '~/db/utils/metrics';
 
 import type { InferInsertModel, InferSelectModel } from 'drizzle-orm';
+import type { SQLiteUpdateSetSource } from 'drizzle-orm/sqlite-core';
 
 export const library = sqliteTable('library', {
   id: integer('id', { mode: 'number' }).primaryKey({ autoIncrement: true }),
@@ -14,3 +15,5 @@ export const library = sqliteTable('library', {
 export type Library = InferSelectModel<typeof library>;
 
 export type NewLibrary = InferInsertModel<typeof library>;
+
+export type SetLibrary = SQLiteUpdateSetSource<typeof library>;

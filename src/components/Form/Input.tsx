@@ -1,5 +1,8 @@
 import { useState } from 'react';
 
+import { AppStates } from '~/context/KeyBinding';
+import { useKeybinding } from '~/hooks';
+
 import type { ChangeEvent, HTMLInputTypeAttribute } from 'react';
 
 import type { FormGroupSharedProps } from './FormGroup';
@@ -13,6 +16,7 @@ interface InputAttributes extends FormGroupSharedProps {
 
 export function Input({ formHandler, id, label, autoFocus, required, type, value }: InputAttributes) {
   const [text, setText] = useState(value?.toString() ?? '');
+  const { setAppState } = useKeybinding();
 
   const onChange = (event: ChangeEvent<HTMLInputElement>) => {
     const newValue = event.target.value;
@@ -30,6 +34,8 @@ export function Input({ formHandler, id, label, autoFocus, required, type, value
       autoFocus={autoFocus}
       required={required}
       onChange={onChange}
+      onFocus={() => setAppState(AppStates.hasFocusInField, true)}
+      onBlur={() => setAppState(AppStates.hasFocusInField, false)}
     />
   );
 }

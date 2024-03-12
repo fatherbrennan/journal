@@ -76,7 +76,7 @@ begin
 end;
 
 create trigger `tr_au_library`
-after update of `title`, `label` on `library`
+after update of `label` on `library`
 when new.`is_deleted` = 0
 begin
   update `fts5_library`

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { CalendarCheck, CalendarX, SortNumericDown, SortNumericDownAlt } from 'react-bootstrap-icons';
+import { Bookmark, BookmarkCheck, CalendarCheck, CalendarX, SortNumericDown, SortNumericDownAlt } from 'react-bootstrap-icons';
 
 import { Button, CalendarButton, Card, EditableCard, FilterBar, Heading, ItemCounter, PaginationBar, Searchbar, StatefulIconButton } from '~/components';
 import { Db, date } from '~/db/utils';
@@ -7,7 +7,8 @@ import { usePagination } from '~/hooks';
 import { DateUtils, Fields } from '~/utils';
 
 import type { Journal } from '~/db/schema/journal';
-import type { SQLDate, SQLOrderKeys } from '~/db/utils';
+import type { SQLDate } from '~/db/types';
+import type { SQLOrderKeys } from '~/db/utils';
 
 interface JournalFormData {
   /**
@@ -23,6 +24,7 @@ export function Dashboard() {
   const [search, setSearch] = useState('');
   const [dateBefore, setDateBefore] = useState<SQLDate>();
   const [dateAfter, setDateAfter] = useState<SQLDate>();
+  const [doShowBookmarkedOnly, setDoShowBookmarkedOnly] = useState<boolean>(false);
   const { activePage, count, items, itemsPerPage, pageNumbers, rangeMin, rangeMax, handleDbResponse, onPage, onPrev, onNext } =
     usePagination<Awaited<ReturnType<typeof Db.getJournals>>['result']>();
 
@@ -85,6 +87,16 @@ export function Dashboard() {
   };
 
   /**
+   * Toggle journal entry bookmark status.
+   * @param journal Returned Journal entry.
+   */
+  const toggleJournalBookmarkStatus = async (journal: Awaited<ReturnType<typeof Db.getJournals>>['result'][number]) => {
+    await Db.updateJournal(journal.id, { date: journal.ts, isBookmarked: !journal.isBookmarked });
+
+    getJournals();
+  };
+
+  /**
    * Get journal items based on order and search.
    */
   const getJournals = () => {
@@ -93,13 +105,14 @@ export function Dashboard() {
       itemsPerPage,
       order,
       search,
+      doShowBookmarkedOnly,
       dateBefore,
       dateAfter,
     }).then(handleDbResponse);
   };
 
   // Force refresh of visible entries on context update
-  useEffect(getJournals, [activePage, itemsPerPage, order, search, dateBefore, dateAfter]);
+  useEffect(getJournals, [activePage, itemsPerPage, order, search, doShowBookmarkedOnly, dateBefore, dateAfter]);
 
   return (
     <>
@@ -114,6 +127,14 @@ export function Dashboard() {
             inactiveIcon={<SortNumericDownAlt />}
             onActive={() => setOrder('desc')}
             onInactive={() => setOrder('asc')}
+          />
+          <StatefulIconButton
+            activeTitle='Only show bookmarked items!'
+            inactiveTitle='Show all items!'
+            activeIcon={<BookmarkCheck />}
+            inactiveIcon={<Bookmark />}
+            onActive={() => setDoShowBookmarkedOnly(false)}
+            onInactive={() => setDoShowBookmarkedOnly(true)}
           />
           <CalendarButton icon={<CalendarCheck />} label='Filter entries from start date!' handler={setDateBefore} />
           <CalendarButton icon={<CalendarX />} label='Filter entries from end date!' handler={setDateAfter} />
@@ -143,6 +164,10 @@ export function Dashboard() {
             editableTitle='Update Entry'
             title={DateUtils.format(Number(item.ts))}
             item={item}
+            bookmark={{
+              isBookmarked: item.isBookmarked,
+              onBookmark: () => toggleJournalBookmarkStatus(item),
+            }}
             onDelete={deleteItem}
             onUpdate={updateItem}
           />

@@ -50,7 +50,6 @@ export function usePagination<T>(props?: UsePaginationProps<T>) {
 
     // Never let the active page be greater than the maximum number of pages
     if (activePage > newRangeMax && activePage !== 1) {
-      console.log(true);
       setActivePage(newRangeMax);
     }
 

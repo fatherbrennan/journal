@@ -1,0 +1,1 @@
+ALTER TABLE journal ADD `is_bookmarked` integer DEFAULT false NOT NULL;

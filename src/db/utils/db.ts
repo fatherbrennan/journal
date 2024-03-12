@@ -10,12 +10,12 @@ import { fts5Journal } from '~/db/schema/virtual/fts5_journal';
 import { fts5Library } from '~/db/schema/virtual/fts5_library';
 import { DbBase, getOffset, highlight, match, sd, selectCount } from '~/db/utils';
 
-import type { Contact, NewContact } from '~/db/schema/contacts';
-import type { Journal, NewJournal } from '~/db/schema/journal';
-import type { Library, NewLibrary } from '~/db/schema/library';
-import type { NewTodos, Todos } from '~/db/schema/todos';
-import type { NewTodoSubitem, TodoSubitem } from '~/db/schema/todos_subitems';
-import type { SQLDate } from '~/db/utils';
+import type { Contact, NewContact, SetContact } from '~/db/schema/contacts';
+import type { Journal, NewJournal, SetJournal } from '~/db/schema/journal';
+import type { Library, NewLibrary, SetLibrary } from '~/db/schema/library';
+import type { NewTodos, SetTodos, Todos } from '~/db/schema/todos';
+import type { NewTodoSubitem, SetTodoSubitem, TodoSubitem } from '~/db/schema/todos_subitems';
+import type { SQLDate } from '~/db/types';
 
 export const SQLOrder = {
   asc: asc,
@@ -32,6 +32,7 @@ export class Db {
     itemsPerPage,
     order,
     search,
+    doShowBookmarkedOnly,
     dateAfter,
     dateBefore,
   }: {
@@ -39,6 +40,7 @@ export class Db {
     itemsPerPage: number;
     order: SQLOrderKeys;
     search: string;
+    doShowBookmarkedOnly: boolean;
     dateAfter?: SQLDate;
     dateBefore?: SQLDate;
   }) {
@@ -46,17 +48,20 @@ export class Db {
     const orderBy = [orderByFn(journal.date), orderByFn(journal.createdAt)];
     const offset = getOffset(activePage, itemsPerPage);
     const whereConditions = [];
+    doShowBookmarkedOnly && whereConditions.push(eq(journal.isBookmarked, true));
     search && whereConditions.push(match<typeof fts5Journal>('fts5_journal', search, 'notes'));
     const where = and(sd(journal), dateBefore ? gt(journal.date, dateBefore) : undefined, dateAfter ? lt(journal.date, dateAfter) : undefined, ...whereConditions);
     const select = search
       ? {
           id: journal.id,
           ts: journal.date,
+          isBookmarked: journal.isBookmarked,
           notes: highlight<typeof fts5Journal>('fts5_journal', 1),
         }
       : {
           id: journal.id,
           ts: journal.date,
+          isBookmarked: journal.isBookmarked,
           notes: journal.notes,
         };
     const from = search ? fts5Journal : journal;
@@ -87,7 +92,7 @@ export class Db {
     return await DbBase.client.update(journal).set(sd(undefined, true)).where(eq(journal.id, recordId));
   }
 
-  public static async updateJournal(recordId: Journal['id'], record: NewJournal) {
+  public static async updateJournal(recordId: Journal['id'], record: SetJournal) {
     return await DbBase.client.update(journal).set(record).where(eq(journal.id, recordId));
   }
 
@@ -157,7 +162,7 @@ export class Db {
     return await DbBase.client.update(contacts).set(sd(undefined, true)).where(eq(contacts.id, recordId));
   }
 
-  public static async updateContact(recordId: Contact['id'], record: NewContact) {
+  public static async updateContact(recordId: Contact['id'], record: SetContact) {
     return await DbBase.client.update(contacts).set(record).where(eq(contacts.id, recordId));
   }
 
@@ -207,7 +212,7 @@ export class Db {
     return await DbBase.client.update(library).set(sd(undefined, true)).where(eq(library.id, recordId));
   }
 
-  public static async updateLibrary(recordId: Library['id'], record: NewLibrary) {
+  public static async updateLibrary(recordId: Library['id'], record: SetLibrary) {
     return await DbBase.client.update(library).set(record).where(eq(library.id, recordId));
   }
 
@@ -221,6 +226,7 @@ export class Db {
         id: true,
         value: true,
         isChecked: true,
+        theme: true,
       },
       where,
       with: {
@@ -239,11 +245,12 @@ export class Db {
 
     // TODO: Issue: `query.todos.findMany()` is not mapping fields, just returning barebone database response.
     type Row = (typeof rows)[number];
-    const result: typeof rows = (rows as unknown as [Row['id'], Row['value'], Row['isChecked'], string][]).map((row) => ({
+    const result: typeof rows = (rows as unknown as [Row['id'], Row['value'], Row['isChecked'], Row['theme'], string][]).map((row) => ({
       id: row[0],
       value: row[1],
       isChecked: !!row[2],
-      subitems: (JSON.parse(row[3]) as [Row['subitems'][number]['id'], Row['subitems'][number]['value'], Row['isChecked']][]).map((srow) => ({
+      theme: row[3],
+      subitems: (JSON.parse(row[4]) as [Row['subitems'][number]['id'], Row['subitems'][number]['value'], Row['isChecked']][]).map((srow) => ({
         id: srow[0],
         value: srow[1],
         isChecked: !!srow[2],
@@ -275,7 +282,7 @@ export class Db {
     });
   }
 
-  public static async updateTodo(recordId: Todos['id'], record: NewTodos) {
+  public static async updateTodo(recordId: Todos['id'], record: SetTodos) {
     return await DbBase.client.update(todos).set(record).where(eq(todos.id, recordId));
   }
 
@@ -299,7 +306,7 @@ export class Db {
     return await DbBase.client.update(todosSubitems).set(sd(undefined, true)).where(eq(todosSubitems.id, recordId));
   }
 
-  public static async updateTodoSubitem(recordId: TodoSubitem['id'], record: NewTodoSubitem) {
+  public static async updateTodoSubitem(recordId: TodoSubitem['id'], record: SetTodoSubitem) {
     return await DbBase.client.update(todosSubitems).set(record).where(eq(todosSubitems.id, recordId));
   }
 }

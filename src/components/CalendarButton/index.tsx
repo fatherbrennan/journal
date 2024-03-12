@@ -9,7 +9,7 @@ import type { Dispatch, SetStateAction } from 'react';
 
 import type { FormDataHandler } from '~/components/Form';
 import type { IconButtonProps } from '~/components/IconButton';
-import type { SQLDate } from '~/db/utils';
+import type { SQLDate } from '~/db/types';
 
 interface CalendarButtonProps extends IconButtonProps {
   label: string;

@@ -1,5 +1,8 @@
 import { useState } from 'react';
 
+import { AppStates } from '~/context/KeyBinding';
+import { useKeybinding } from '~/hooks';
+
 import type { ChangeEvent } from 'react';
 
 import type { FormGroupSharedProps } from './FormGroup';
@@ -8,6 +11,7 @@ interface TextAreaProps extends FormGroupSharedProps {}
 
 export function TextArea({ formHandler, id, label, autoFocus, required, value }: TextAreaProps) {
   const [text, setText] = useState(value?.toString() ?? '');
+  const { setAppState } = useKeybinding();
   const dict = [
     { value: 'Patrick', pattern: /\bpatrick\b/g },
     { value: 'filter', pattern: /\bphilter\b/g },
@@ -39,6 +43,8 @@ export function TextArea({ formHandler, id, label, autoFocus, required, value }:
       autoFocus={autoFocus}
       required={required}
       onChange={onChange}
+      onFocus={() => setAppState(AppStates.hasFocusInField, true)}
+      onBlur={() => setAppState(AppStates.hasFocusInField, false)}
     ></textarea>
   );
 }

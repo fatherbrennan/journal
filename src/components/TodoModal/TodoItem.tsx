@@ -1,12 +1,13 @@
 import { useState } from 'react';
 
 import { IconButton } from '~/components';
-import { Bin, Check, Edit, Plus, X } from '~/icons';
+import { Bin, Check, CircleFill, Edit, Palette, Plus, X } from '~/icons';
 import { EditableTodoItem } from './EditableTodoItem';
 import { TodoItemCheckbox } from './TodoItemCheckbox';
 
 import type { Todos } from '~/db/schema/todos';
 import type { TodoSubitem } from '~/db/schema/todos_subitems';
+import { Theme, themes, type ThemeTypeKeys, type ThemeTypeValue } from '~/db/utils/theme';
 
 interface TodoItemProps {
   /**
@@ -18,6 +19,11 @@ interface TodoItemProps {
    * Item value.
    */
   value: Todos['value'];
+
+  /**
+   * Item theme.
+   */
+  theme: ThemeTypeValue;
 
   /**
    * Should component act as a subitem.
@@ -55,12 +61,20 @@ interface TodoItemProps {
    * @param id Unique identifier of todo item.
    */
   onSubmit: (data: any, id: Todos['id'] | TodoSubitem['id']) => void;
+
+  /**
+   * Callback function to execute on theme selection. Should only use on parent theme.
+   * @param theme Selected theme.
+   * @param id Unique identifier of todo item.
+   */
+  onTheme?: (theme: ThemeTypeKeys, id: Todos['id'] | TodoSubitem['id']) => void;
 }
 
-export function TodoItem({ id, value, isSubitem = false, isChecked = false, onCreate, onCheck, onDelete, onSubmit }: TodoItemProps) {
+export function TodoItem({ id, value, theme, isSubitem = false, isChecked = false, onCreate, onCheck, onDelete, onSubmit, onTheme }: TodoItemProps) {
   const [isCheckMode, setIsCheckMode] = useState(false);
   const [isUpdateMode, setIsUpdateMode] = useState(false);
   const [isDeleteMode, setIsDeleteMode] = useState(false);
+  const [isColorMode, setIsColorMode] = useState(false);
   const [checkTimeoutId, setCheckTimeoutId] = useState<NodeJS.Timeout>();
 
   /**
@@ -111,6 +125,15 @@ export function TodoItem({ id, value, isSubitem = false, isChecked = false, onCr
   };
 
   /**
+   * Trigger submit event for parent component.
+   * @param theme New theme.
+   */
+  const updateItemTheme = (theme: ThemeTypeKeys) => {
+    onTheme && onTheme(theme, id);
+    setIsColorMode(false);
+  };
+
+  /**
    * Set item to check mode.
    */
   const attemptCheckItem = () => {
@@ -126,13 +149,13 @@ export function TodoItem({ id, value, isSubitem = false, isChecked = false, onCr
   };
 
   return (
-    <div className='flex justify-between w-full my-2 group'>
+    <div className={`flex justify-between w-full my-2 group ${theme.text}`}>
       {isUpdateMode ? (
         <EditableTodoItem value={value} onCancel={cancelUpdateItem} onSubmit={updateItem} />
       ) : (
         <div className='flex flex-row items-center w-full rounded-lg hover:bg-primary'>
-          <TodoItemCheckbox isChecked={isChecked} isCheckActive={isCheckMode} onClick={isCheckMode ? cancelCheckItem : attemptCheckItem} />
-          <label className={`flex-grow overflow-auto${isChecked ? ' text-gray-400' : ''}`}>{value}</label>
+          <TodoItemCheckbox theme={theme} isChecked={isChecked} isCheckActive={isCheckMode} onClick={isCheckMode ? cancelCheckItem : attemptCheckItem} />
+          <label className={`flex-grow overflow-auto${isChecked ? ' opacity-50' : ''}`}>{value}</label>
           <div className='flex invisible group-hover:visible'>
             {isChecked ? (
               isDeleteMode ? (
@@ -143,8 +166,16 @@ export function TodoItem({ id, value, isSubitem = false, isChecked = false, onCr
               ) : (
                 <IconButton onClick={() => setIsDeleteMode(true)} icon={<Bin />} />
               )
+            ) : isColorMode ? (
+              <>
+                <IconButton onClick={() => setIsColorMode(false)} icon={<X />} />
+                {themes.map((t) => (
+                  <IconButton key={t} onClick={() => updateItemTheme(t)} icon={<CircleFill overrideTheme={Theme[t]} />} />
+                ))}
+              </>
             ) : (
               <>
+                {!isSubitem && <IconButton onClick={() => setIsColorMode(true)} icon={<Palette />} />}
                 <IconButton onClick={attemptUpdateItem} icon={<Edit />} />
                 {!isSubitem && <IconButton onClick={createSubitem} icon={<Plus />} />}
               </>
