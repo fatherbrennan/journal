@@ -141,7 +141,7 @@ export function Card({ editableTitle, fields, bookmark, item, isTitleHtml, title
                 <>
                   <label
                     className={field.cardIsSrOnly === false ? 'text-gray-600 font-semibold mt-2 block *:text-teal-400 *:bg-transparent' : 'sr-only'}
-                    dangerouslySetInnerHTML={santitizeHtml(item[field.key])}
+                    dangerouslySetInnerHTML={santitizeHtml(field.label)}
                   ></label>
                   <p className='font-normal text-gray-500 whitespace-pre-line *:text-teal-400 *:bg-transparent' dangerouslySetInnerHTML={santitizeHtml(item[field.key])}></p>
                 </>
